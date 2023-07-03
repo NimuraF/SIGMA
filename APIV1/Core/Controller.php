@@ -1,5 +1,6 @@
 <?php
 
+
 class Controller {
     
     public function showJson(array $toJson) {

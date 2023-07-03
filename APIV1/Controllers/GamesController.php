@@ -3,24 +3,30 @@
 class GamesController extends Controller {
 
     /* Возвращает список всех игр */
-    public function allGames () {
+    public function allGames ($request = new Request) {
         $DB = new DB;
-        return $this->showJson($DB->query('SELECT * from games'));
+        if (isset($request->params[0]["page"])) {
+            return $this->showJson
+            (
+                $DB->select("games")->limit( (int) $request->params[0]["page"] )->get()
+            );
+        } else {
+            return $this->showJson
+            (
+                $DB->select("games")->limit(0)->get()
+            );
+        }
     }
 
-    public function generateRandom() {
-        
+    /* Возвращает информацию о конкретной игре по её id */
+    public function getGameInfo(string $id) {
+        $DB = new DB;
+        if($result = $DB->select("games", ['id', 'name', 'publisher', 'platform'])->where([
+            ["id", "=", $id]
+        ])->get()) 
+        {
+            return $this->showJson($result);
+        }
     }
 
-    public function getGameInfo(Request $request) {
-        $arrayReturn = [];
-        $gameID = explode('/', $_SERVER['REQUEST_URI']);
-        $DB = new DB;
-        $gameInfo = $DB->query('SELECT * from games WHERE id = 1');
-        array_push($arrayReturn, ['game_info' => $gameInfo]);
-        $param = $gameInfo[0]['name'];
-        $gameGenres = $DB->query("SELECT genre_name from games_genres WHERE game_name = '$param'");
-        array_push($arrayReturn, ['genres' => $gameGenres]);
-        return $this->showJson($arrayReturn);
-    }
 }
