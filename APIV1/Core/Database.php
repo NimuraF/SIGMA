@@ -28,12 +28,16 @@ class DB {
     }
 
     /* Реализует запрос без параметризации (не требует подготовки выражения) */
-    public function query(string $sql) {
+    public function query(string $sql) : array {
         $arrayReturn = [];
         $result = $this->pdo->query($sql);
-        while($row = $result->fetch()) {
-            array_push($arrayReturn, $row);
+
+        if ($result) {
+            while($row = $result->fetch()) {
+                array_push($arrayReturn, $row);
+            }
         }
+
         return $arrayReturn;
     }
 

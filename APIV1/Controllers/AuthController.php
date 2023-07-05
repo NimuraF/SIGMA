@@ -95,19 +95,33 @@ class AuthController extends Controller {
                     ['name', '=', $name]
                 ])->get()[0]['id'];
 
+
                 /* Если удалось создать и записать токен пользователя, то устанавливаем его сразу же в куки*/
-                if ($DB->insert('tokens', ['user_id' => $userID,'token' => $userToken = $token->createToken([$email, $name])])) {
+                if ($DB->insert('tokens', ['user_id' => $userID, 'token' => $userToken = $token->createToken([$email, $name])])) {
 
-                    /* Времая жизни куки ставим в 24 часа */
-                    setcookie('token', $userToken, time() + 60*60*24);
+                    if ($DB->insert('roles_users', ['user_id' => $userID, 'role_name' => 'User'])) {
 
-                    return true;
-                } else {
+                        /* Время жизни куки ставим в 24 часа */
+                        setcookie('token', $userToken, time() + 60*60*24);
+                        return true;
+
+                    } 
+                    else 
+                    {
+                        throw new Exception("Упс, не удалось присвоить роль!");
+                        return false;
+                    }
+
+                } 
+                else 
+                {
                     throw new Exception("Не удалось сгенерировать токен доступа");
                     return false;
                 }
 
-            } else {
+            } 
+            else 
+            {
                 throw new Exception("Упс, что-то пошло не так");
                 return false;
             }

@@ -32,9 +32,11 @@ class Token {
         /* Достаём массив токенов из БД */
         $result = $DB->query("SELECT token FROM tokens");
 
+
         /* Переменная, отвечаюшая за уникальность токена*/
         $unique = false;
 
+        
         /* 
         Проверяем токен на уникальность, если же токен не уникален,
         то генерируем новый до тех пор, пока он не станет уникальным
@@ -43,7 +45,7 @@ class Token {
             $flag = true;
             $token = hash($alg, implode("", $data).microtime());
             foreach($result as $savedToken) {
-                if(strcmp($token, $savedToken)) {
+                if(strcmp($token, $savedToken['token']) == 0) {
                     $flag = false;
                     break;
                 }
