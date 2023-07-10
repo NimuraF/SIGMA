@@ -2,7 +2,8 @@
 
 class permissioncheckMiddleware extends Middleware {
 
-    public function __construct() {
+    public function handle(Request $request, callable $next) : Response 
+    {
 
         $token = new Token();
 
@@ -53,11 +54,13 @@ class permissioncheckMiddleware extends Middleware {
 
         /* Если не удалось найти прав на подобный маршрут - бросаем ошибку */
         if($accesGranted !== true) {
-            $this->error("Access denied");
+            return new Response(new class {
+                public string $access = "denied";
+                public string $errorm = "non anouth permissions";
+            });
         }
 
-        $path = $_SERVER['REQUEST_URI'];
-        //print_r($path);
+        return $next($request);
     }
 
 }

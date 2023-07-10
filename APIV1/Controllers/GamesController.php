@@ -4,14 +4,19 @@ class GamesController extends Controller {
 
     /* Возвращает список всех игр */
     public function allGames ($request = new Request) {
+
         $DB = new DB;
-        if (isset($request->params[0]["page"])) {
-            return $this->showJson
+
+        if (isset($request->params[0]["page"])) 
+        {
+            return $this->json
             (
                 $DB->select("games")->limit( (int) $request->params[0]["page"] )->get()
             );
-        } else {
-            return $this->showJson
+        } 
+        else 
+        {
+            return $this->json
             (
                 $DB->select("games")->limit(0)->get()
             );
@@ -25,7 +30,7 @@ class GamesController extends Controller {
             ["id", "=", $id]
         ])->get()) 
         {
-            return $this->showJson($result);
+            return $this->json($result);
         }
     }
 

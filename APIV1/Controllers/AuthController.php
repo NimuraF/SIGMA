@@ -8,64 +8,52 @@ class AuthController extends Controller {
         /* Определяем класс токена */
         $token = new Token();
 
-        /* Если токена не существует */
-        if (!$token->getToken()) { 
+        /* Проверяем, чтобы в реквесте находились параметры авторизации */
+        if (isset($request->params[0]['email']) && isset($request->params[0]['password'])) {
 
-            /* Проверяем, чтобы в реквесте находились параметры авторизации */
-            if (isset($request->params[0]['email']) && isset($request->params[0]['password'])) {
+            $DB = new DB();
 
-                $DB = new DB();
+            /* Извлекаем данные юзера по заданным параметрам */
+            $user = $DB->select("users")->where(
+                [
+                    ['email', '=', $request->params[0]['email']]
+                ])
+                ->get();
 
-                /* Извлекаем данные юзера по заданным параметрам */
-                $user = $DB->select("users")->where(
-                    [
-                        ['email', '=', $request->params[0]['email']]
-                    ])
-                    ->get();
+            /* Если пользователь был найден и при этом только один */
+            if (sizeof($user) == 1) {
 
                 /* Если пользователь был найден, то проверяем соответствие хэшей паролей */
-                if (sizeof($user) == 1) {
+                if (password_verify($request->params[0]['password'], $user[0]['password'])) {
 
-                    if (password_verify($request->params[0]['password'], $user[0]['password'])) {
+                    /* Генерируем хэш-ключ */
+                    $hash = hash('sha256', $request->params[0]['email'].$request->params[0]['email'].microtime());
 
-                        /* Генерируем хэш-ключ */
-                        $hash = hash('sha256', $request->params[0]['email'].$request->params[0]['email'].microtime());
-
-                        /* Если удалось добавить хэш в БД, то устанавливаем куку и её время жизни (24 часа) */
-                        if($DB->insert('tokens', ['user_id' => $user[0]['id'],'token' => $hash])) {
-                            setcookie("token", $hash, time() + 60*60*24);
-                            return true;
-                        } 
-                        else 
-                        {
-                            throw new Exception("Не удалось установить токен!");
-                            return false;
-                        }
-
+                    /* Если удалось добавить хэш в БД, то устанавливаем куку и её время жизни (24 часа) */
+                    if($DB->insert('tokens', ['user_id' => $user[0]['id'],'token' => $hash])) {
+                        setcookie("token", $hash, time() + 60*60*24);
+                        return true;
                     } 
                     else 
                     {
-                        throw new Exception("Неверный логин/пароль!");
-                        return false;
+                        return Controller::errorMessage("Ooop's, something went wrong! Please try again later.");
                     }
 
                 } 
                 else 
                 {
-                    throw new Exception("Неверный логин/пароль!");
-                    return false;
+                    return Controller::errorMessage("Incorrect login or password.");
                 }
             } 
-            else {
-                throw new Exception("Некорректно переданы параметры!");
-                return false;
+            else 
+            {
+                return Controller::errorMessage("Incorrect login or password.");
             }
         } 
         else 
         {
-            return true;
+            return Controller::errorMessage("Ooop's, something went wrong! Please try again later.");
         }
-
     }
 
 
@@ -75,7 +63,7 @@ class AuthController extends Controller {
         /* Проверяем существование переданных почты, имени и пароля в реквесте */
         if (isset($request->params[0]['email']) && isset($request->params[0]['name']) && isset($request->params[0]['password'])) {
 
-            /* Извлекаем почту, имя и пароль */
+            /* Извлекаем почту, имя и пароль */ 
             $email = $request->params[0]['email'];
             $name = $request->params[0]['name'];
             $password = $request->params[0]['password'];
@@ -96,9 +84,10 @@ class AuthController extends Controller {
                 ])->get()[0]['id'];
 
 
-                /* Если удалось создать и записать токен пользователя, то устанавливаем его сразу же в куки*/
+                /* Если удалось создать и записать токен пользователя, то устанавливаем его сразу же в куки */
                 if ($DB->insert('tokens', ['user_id' => $userID, 'token' => $userToken = $token->createToken([$email, $name])])) {
 
+                    /* По умолчванию при регистрации ставим роль user */
                     if ($DB->insert('roles_users', ['user_id' => $userID, 'role_name' => 'User'])) {
 
                         /* Время жизни куки ставим в 24 часа */
@@ -109,27 +98,23 @@ class AuthController extends Controller {
                     else 
                     {
                         throw new Exception("Упс, не удалось присвоить роль!");
-                        return false;
                     }
 
                 } 
                 else 
                 {
                     throw new Exception("Не удалось сгенерировать токен доступа");
-                    return false;
                 }
 
             } 
             else 
             {
                 throw new Exception("Упс, что-то пошло не так");
-                return false;
             }
         } 
         else 
         {
             throw new Exception("Некорректные параметры");
-            return false;
         }
     }
 

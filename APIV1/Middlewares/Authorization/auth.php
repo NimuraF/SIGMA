@@ -8,17 +8,19 @@ class authMiddleware extends Middleware {
     таковой перед разрешением доступа к маршруту
     */
 
-    public function __construct() {
+    public function handle(Request $request, callable $next) : Response {
+
         $token = new Token();
 
         /* Проверяем токен */
         if (!$token->getValidated()) {
-            echo json_encode(new class {
-                public $access = false;
-                public $errorm = "invalid token";
+            return new Response(new class {
+                public string $access = "denied";
+                public string $errorm = "invalid token";
             });
-            exit;
         }
+
+        return $next($request);
     }
 
 }

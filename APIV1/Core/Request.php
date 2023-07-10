@@ -2,7 +2,7 @@
 
 class Request {
     public array $params = [];
-    static string $ipadr = "";
+    public string $ipadr = "";
 
     public function __construct() {
         
