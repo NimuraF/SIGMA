@@ -13,7 +13,7 @@ class permissioncheckMiddleware extends Middleware {
         $roles = $DB->select('roles_users', ['role_name'])->where(
                 [
                     [
-                        /* Вызываем call_oser_func, чтобы сразу получить результат, 
+                        /* Вызываем call_user_func, чтобы сразу получить результат, 
                         потому что стрелочные функции в пыхе работают как параша
                         */
 

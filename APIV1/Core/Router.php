@@ -109,7 +109,7 @@ final class Router {
             $route = str_replace('/', "\/", $route)."$";
         }
 
-        /* Устанавливаем контекст текущего маршрута для последующего навешивания middleare-ов */
+        /* Устанавливаем контекст текущего маршрута для последующего навешивания middleware-ов */
         self::$currentRoute = $route;
         self::$currentMethod = "GET";
 

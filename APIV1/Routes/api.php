@@ -4,8 +4,16 @@
 /* GAMES */
 Router::get('/', GamesController::class, 'allGames');
 Router::get('/games', GamesController::class, 'allGames'); //Метод, возвращающий все записи из таблицы игр
-Router::get('/games/{id}', GamesController::class, 'getGameInfo')::middleware("auth|permissioncheck"); //Метод, возвращающий информацию об игре по её id
+Router::get('/games/{id}', GamesController::class, 'getGameInfo'); //Метод, возвращающий информацию об игре по её id
+Router::post('/games/create', GamesController::class, 'loadGame')::middleware('auth|permissioncheck'); //Метод, позволяющий загрузить информацию о новой игре
 
+
+/* NEWS */
+Router::get('/news', NewsController::class, 'allNews'); //Метод, отвечающий за возврат всех новостей
+
+
+/* USER */
+Router::post('/user/{id}/loadavatar', UserController::class, 'loadAvatar')::middleware('auth'); //Метод, отвечающий за загрузку изображения
 
 
 /* АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ */

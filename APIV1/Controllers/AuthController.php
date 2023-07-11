@@ -9,14 +9,14 @@ class AuthController extends Controller {
         $token = new Token();
 
         /* Проверяем, чтобы в реквесте находились параметры авторизации */
-        if (isset($request->params[0]['email']) && isset($request->params[0]['password'])) {
+        if (isset($request->params['email']) && isset($request->params['password'])) {
 
             $DB = new DB();
 
             /* Извлекаем данные юзера по заданным параметрам */
             $user = $DB->select("users")->where(
                 [
-                    ['email', '=', $request->params[0]['email']]
+                    ['email', '=', $request->params['email']]
                 ])
                 ->get();
 
@@ -24,10 +24,10 @@ class AuthController extends Controller {
             if (sizeof($user) == 1) {
 
                 /* Если пользователь был найден, то проверяем соответствие хэшей паролей */
-                if (password_verify($request->params[0]['password'], $user[0]['password'])) {
+                if (password_verify($request->params['password'], $user[0]['password'])) {
 
                     /* Генерируем хэш-ключ */
-                    $hash = hash('sha256', $request->params[0]['email'].$request->params[0]['email'].microtime());
+                    $hash = hash('sha256', $request->params['email'].$request->params['email'].microtime());
 
                     /* Если удалось добавить хэш в БД, то устанавливаем куку и её время жизни (24 часа) */
                     if($DB->insert('tokens', ['user_id' => $user[0]['id'],'token' => $hash])) {
@@ -61,12 +61,12 @@ class AuthController extends Controller {
     public function createUser(Request $request) : bool {
 
         /* Проверяем существование переданных почты, имени и пароля в реквесте */
-        if (isset($request->params[0]['email']) && isset($request->params[0]['name']) && isset($request->params[0]['password'])) {
+        if (isset($request->params['email']) && isset($request->params['name']) && isset($request->params['password'])) {
 
             /* Извлекаем почту, имя и пароль */ 
-            $email = $request->params[0]['email'];
-            $name = $request->params[0]['name'];
-            $password = $request->params[0]['password'];
+            $email = $request->params['email'];
+            $name = $request->params['name'];
+            $password = $request->params['password'];
 
             /* Если переменные были переданы, то окрываем соединение с базой данных и загружаем данные */
             $DB = new DB();

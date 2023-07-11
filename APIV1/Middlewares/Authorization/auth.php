@@ -18,6 +18,10 @@ class authMiddleware extends Middleware {
                 public string $access = "denied";
                 public string $errorm = "invalid token";
             });
+        } 
+        else 
+        {
+            $request->auth = $token->getToken();
         }
 
         return $next($request);
