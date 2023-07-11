@@ -35,7 +35,6 @@ class GamesController extends Controller {
 
 
 
-
     /* Возвращает информацию о конкретной игре по её id (вместе с жанрами) */
     public function getGameInfo(string $id) {
 
@@ -102,24 +101,39 @@ class GamesController extends Controller {
                             /* Обновляем картинку у игры */
                             if ($DB->update('games', ['image' => $pathToFile])->where([['name', '=', $request->params['name']]])->set()) {
 
-                                $note = 'image succesfully updated';
+                                $note .= 'image succesfully updated';
 
                             } 
                             else 
                             {
-                                $note = "failed to load image";
+                                $note .= "failed to load image";
                             }
 
                         } 
                         else 
                         {
-                            $note = "failed to load image";
+                            $note .= "failed to load image";
                         }
 
                     } 
                     else 
                     {
-                        $note = "failed to load image";
+                        $note .= "failed to load image";
+                    }
+
+                }
+
+
+                /* Проверяем на наличие жанров при добавлении игры */
+                if ( isset($request->params['genres']) ) {
+
+                    /* Перебираем все жанры, пришедшие от пользователя */
+                    foreach($request->params['genres'] as $genre) {
+
+                        if (!$DB->insert('games_genres', ['game_name' => $request->params['name'], 'genre_name' => $genre])) {
+                            $note .= " | can't add genre ".$genre." to game ".$request->params['name'];
+                        }
+
                     }
 
                 }
@@ -135,4 +149,6 @@ class GamesController extends Controller {
         return $this->errorMessage("Not enough parameters");
         
     }
+
+    
 }

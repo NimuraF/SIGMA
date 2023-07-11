@@ -128,6 +128,9 @@ class DB {
 
 
 
+
+
+
     
     /* Метод параметризации основных команд SQL */
     public function where (?array $conditions) {

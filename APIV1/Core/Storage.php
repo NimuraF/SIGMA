@@ -36,8 +36,10 @@ final class Storage {
 
     /* Метод для удаления изображений */
     static function delete($filePath) : bool {
-        if(unlink($filePath)) {
-            return true;
+        if (file_exists($filePath)) {
+            if(unlink($filePath)) {
+                return true;
+            }
         }
         return false;
     }
