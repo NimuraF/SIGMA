@@ -17,7 +17,7 @@ class DB {
         string $port = '3306', 
         string $dbname = 'gamedata', 
         string $user = 'root', 
-        string $password = 'kirik556')
+        string $password = '1111')
     {
         $opt = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_SILENT, 
