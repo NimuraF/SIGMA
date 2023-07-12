@@ -27,7 +27,10 @@ class DB {
         $this->pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;", $user, $password, $opt);
     }
 
-    /* Реализует запрос без параметризации (не требует подготовки выражения) */
+    /* 
+        Реализует запрос без параметризации 
+        (не требует подготовки выражения) 
+    */
     public function query(string $sql) : array {
         $arrayReturn = [];
         $result = $this->pdo->query($sql);
@@ -40,6 +43,26 @@ class DB {
 
         return $arrayReturn;
     }
+
+
+
+
+
+    /*
+        Реализует запрос без параметризации и
+        возвращает только true или false в зависимости
+        от успешности / неуспешности запроса
+    */
+    public function queryTF(string $sql) : bool {
+
+        if ($this->pdo->query($sql)) {
+            return true;
+        }
+
+        return false;
+    }
+
+
 
 
     /* 

@@ -1,0 +1,6 @@
+{
+    "name": "mado/game-data-api",
+    "require": {
+        "fakerphp/faker": "^1.23"
+    }
+}
