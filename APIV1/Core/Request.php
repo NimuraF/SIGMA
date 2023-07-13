@@ -1,6 +1,6 @@
 <?php
 
-class Request {
+final class Request {
     public array $params = [];
     public string $ipadr = "";
     public string|bool $auth = false;

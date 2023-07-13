@@ -5,7 +5,6 @@ final class Storage {
     static private string $path = "./Storage/";
 
 
-
     /* Метод сохранения изображений */
     static function save(array $fileInfo, string $directory = "") : string {
 

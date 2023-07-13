@@ -13,9 +13,10 @@ Router::get('/news', NewsController::class, 'allNews'); //Метод, отвеч
 
 
 /* USER */
+Router::get('/user/{id}', UserController::class, 'userInfo'); //Метод, возвращающий всю информацию о пользователе
 Router::post('/user/{id}/loadavatar', UserController::class, 'loadAvatar')::middleware('auth'); //Метод, отвечающий за загрузку изображения
 
 
 /* АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ */
-Router::post('/registration', AuthController::class, 'createUser'); //Маршрут для регистрации пользователя
-Router::post('/authentication', AuthController::class, 'authentication'); //Метод для аутентификации
+Router::post('/registration', AuthController::class, 'createUser')::middleware('notauth'); //Маршрут для регистрации пользователя
+Router::post('/authentication', AuthController::class, 'authentication')::middleware('notauth'); //Метод для аутентификации

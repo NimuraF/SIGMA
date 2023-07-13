@@ -103,15 +103,16 @@ final class Router {
                 }
             }
 
-            $route = implode("\/", $arrayRoute)."$";
+            $route = "^".implode("\/", $arrayRoute)."$";
         } 
         else {
-            $route = str_replace('/', "\/", $route)."$";
+            $route = "^".str_replace('/', "\/", $route)."$";
         }
 
         /* Устанавливаем контекст текущего маршрута для последующего навешивания middleware-ов */
         self::$currentRoute = $route;
         self::$currentMethod = "GET";
+
 
         array_push(self::$routes, ['method' => 'GET', 'route' => $route, 'controller' => $controller, 'action' => $action]);
         return self::class;
@@ -141,10 +142,10 @@ final class Router {
                 }
             }
 
-            $route = implode("\/", $arrayRoute)."$";
+            $route = "^".implode("\/", $arrayRoute)."$";
         } 
         else {
-            $route = str_replace('/', "\/", $route)."$";
+            $route = "^".str_replace('/', "\/", $route)."$";
         }
 
         /* Устанавливаем контекст текущего маршрута для последующего навешивания middleare-ов */
@@ -167,8 +168,8 @@ final class Router {
 
         $params = [];
 
-        /* Парсим параметры из пути */
-        $defaultRouteArray = explode('/', stripcslashes(str_replace('$', '', $defaultRoute)));
+        /* Парсим параметры из пути */ //str_replace('$', '', str_replace('^', '', $defaultRoute)))
+        $defaultRouteArray = explode('/', stripcslashes(preg_replace("/\w*(\^|\\$)\w*/", "", $defaultRoute)));
         for ($i = 0; $i < sizeof($currentRouteArray = explode('/', $currentRoute)); $i++) {
             if($defaultRouteArray[$i] !== $currentRouteArray[$i]) {
                 array_push($params, $currentRouteArray[$i]);

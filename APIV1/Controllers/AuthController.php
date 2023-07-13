@@ -97,24 +97,24 @@ class AuthController extends Controller {
                     } 
                     else 
                     {
-                        throw new Exception("Упс, не удалось присвоить роль!");
+                        return Controller::errorMessage("Ooop's, something went wrong! Failed to add role.");
                     }
 
                 } 
                 else 
                 {
-                    throw new Exception("Не удалось сгенерировать токен доступа");
+                    return Controller::errorMessage("Failed to generete token");
                 }
 
             } 
             else 
             {
-                throw new Exception("Упс, что-то пошло не так");
+                return Controller::errorMessage("Ooop's, something went wrong!");
             }
         } 
         else 
         {
-            throw new Exception("Некорректные параметры");
+            return Controller::errorMessage("Incorrect params");
         }
     }
 

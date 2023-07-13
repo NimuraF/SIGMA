@@ -68,4 +68,24 @@ class UserController extends Controller {
 
     }
 
+
+    /* Метод, отвечающий за получение информации о пользователе */
+    public function userInfo(string $id) {
+
+        $DB = new DB();
+
+
+        if ($userInfo = $DB
+                ->select('users', ['id', 'name', 'avatar', 'banner'])
+                ->where([['id', '=', $id]])
+                ->get()
+            ) 
+        {
+            return $this->json($userInfo);
+        }
+
+        return Controller::errorMessage("User doesn't exists");
+
+    }
+
 }

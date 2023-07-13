@@ -16,12 +16,12 @@ require_once "Filters/BaseFilter.php"; //Подключаем базовый ф�
 
 require_once "Routes/api.php"; //Подключаем таблицу маршрутов 
 
-// try {
+try {
     Router::Start();
-// } 
-// catch (Exception $e) {
-//     $e->getMessage();
-// }
-// catch (PDOException $e) {
-//     $e->getMessage();
-// }
+} 
+catch (Exception $e) {
+    $e->getMessage();
+}
+catch (PDOException $e) {
+    $e->getMessage();
+}
