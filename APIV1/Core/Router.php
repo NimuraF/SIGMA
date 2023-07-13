@@ -77,6 +77,9 @@ final class Router {
             }
         }
 
+        self::handle(self::error404());
+
+        return 1;
     }
 
 
@@ -237,5 +240,13 @@ final class Router {
     static function redirect() {
 
     }
+
+    /* Метод для отправки 404 ответа */
+    static function error404 () : Response {
+        return new Response(new class {
+            public string $access = "denied";
+            public string $errorm = "Invalid route!";
+        });
+    } 
 
 }
