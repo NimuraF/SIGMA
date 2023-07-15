@@ -3,6 +3,7 @@
 class Token {
     private $token;
     private $validated = false;
+    private int|bool $currentUser = false;
 
     /* 
     При вызове конструктора проверяем наличие токена в куках,
@@ -88,5 +89,10 @@ class Token {
     /* Метод, возвращающий значение текущего токена */
     public function getToken() {
         return $this->token;
+    }
+
+    /* Метод, возвращающий id авторизованного юзера или false, если его нет */
+    public function getUser() : bool|int {
+        return $this->currentUser;
     }
 }

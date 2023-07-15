@@ -39,9 +39,9 @@ class UserController extends Controller {
 
 
                             /* Если удалось сохранить запись в базу данных */
-                            if ($DB->update('users', ['avatar' => $path])->where([['id', '=', $userID]])->get()) {
+                            if ($DB->update('users', ['avatar' => $path])->where([['id', '=', $userID]])->set()) {
 
-                                return $this->json(['success' => true]);
+                                return $this->json();
 
                             }
 
@@ -105,9 +105,9 @@ class UserController extends Controller {
 
                     if 
                     (
-                        /* Ширина изображения */ $imageInfo[0] < 2100 && 
-                        /* Высота изображения */ $imageInfo[1] < 600 &&
-                        /* Размер изображения (байт) */ $request->params['image']['size'] < 40000
+                        /* Ширина изображения */ $imageInfo[0] < 4000 && 
+                        /* Высота изображения */ $imageInfo[1] < 4000 &&
+                        /* Размер изображения (байт) */ $request->params['image']['size'] < 10000000
                     ) 
                     {
 
@@ -122,10 +122,9 @@ class UserController extends Controller {
 
 
                             /* Если удалось сохранить запись в базу данных */
-                            if ($DB->update('users', ['banner' => $path])->where([['id', '=', $userID]])->get()) {
+                            if ($DB->update('users', ['banner' => $path])->where([['id', '=', $userID]])->set()) {
 
-                                return $this->json(['success' => true]);
-
+                                return $this->json();
                             }
 
                         }
@@ -133,14 +132,14 @@ class UserController extends Controller {
                     } 
                     else 
                     {
-                        return Controller::errorMessage('Wrong parameters');
+                        return Controller::errorMessage('Wrong parameters 1');
                     }
                 
                 }
             } 
             else 
             {
-                return Controller::errorMessage('Wrong parameters');
+                return Controller::errorMessage('Wrong parameters 2');
             }
 
         } 

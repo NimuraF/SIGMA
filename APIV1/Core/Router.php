@@ -22,6 +22,14 @@ final class Router {
         $currentRoute = explode('?', $_SERVER['REQUEST_URI']); 
         self::$currentRoute = $currentRoute[0]; //Устанавливаем текущее значение пути для работы middleware'ов
 
+
+        /* Проверяем, не является ли пришедший запрос json-ом */
+        if (isset(getallheaders()['Content-Type'])) {
+            if ( getallheaders()['Content-Type'] == 'application/json') {
+                $_POST = json_decode(file_get_contents('php://input'), true);
+            }
+        }   
+
         /* Инициализируем объект реквеста */
         $request = new Request;
 
@@ -241,6 +249,10 @@ final class Router {
 
     }
 
+
+
+
+
     /* Метод для отправки 404 ответа */
     static function error404 () : Response {
         return new Response(new class {
@@ -248,5 +260,6 @@ final class Router {
             public string $errorm = "Invalid route!";
         });
     } 
+    
 
 }

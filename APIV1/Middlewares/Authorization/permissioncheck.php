@@ -55,7 +55,7 @@ class permissioncheckMiddleware extends Middleware {
         /* Если не удалось найти прав на подобный маршрут - бросаем ошибку */
         if($accesGranted !== true) {
             return new Response(new class {
-                public string $access = "denied";
+                public bool $access = false;
                 public string $errorm = "non anouth permissions";
             });
         }

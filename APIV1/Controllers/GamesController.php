@@ -138,15 +138,15 @@ class GamesController extends Controller {
 
                 }
                 
-                return $this->json(['success' => true, 'note' => $note]);
+                return $this->json(['note' => $note]);
 
             }
 
-            return $this->errorMessage("Something went wrong");
+            return Controller::errorMessage("Something went wrong");
 
         }
 
-        return $this->errorMessage("Not enough parameters");
+        return Controller::errorMessage("Not enough parameters");
         
     }
 

@@ -15,7 +15,7 @@ class authMiddleware extends Middleware {
         /* Проверяем токен */
         if (!$token->getValidated()) {
             return new Response(new class {
-                public string $access = "denied";
+                public bool $access = false;
                 public string $errorm = "invalid token";
             });
         } 

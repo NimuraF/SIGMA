@@ -25,7 +25,7 @@ final class Storage {
         */
         if(move_uploaded_file($fileInfo['tmp_name'], $path = $path.self::getRandomFileName($extension))) {
             
-            return $path;
+            return substr($path, 2);
         }
 
         return "";

@@ -3,7 +3,7 @@
 class AuthController extends Controller {
 
     /* Метод аутентификации пользователя */
-    public function authentication (Request $request) : bool {
+    public function authentication (Request $request) {
 
         /* Определяем класс токена */
         $token = new Token();
@@ -31,8 +31,17 @@ class AuthController extends Controller {
 
                     /* Если удалось добавить хэш в БД, то устанавливаем куку и её время жизни (24 часа) */
                     if($DB->insert('tokens', ['user_id' => $user[0]['id'],'token' => $hash])) {
-                        setcookie("token", $hash, time() + 60*60*24);
-                        return true;
+
+                        setcookie("token", $hash, [
+                            'expires' => time() + 60*60*24,
+                            'path' => '/',
+                            'domain' => 'gamedata.ru',
+                            'httponly' => true,
+                            'samesite' => 'Lax',
+                        ]);
+
+                        return $this->json(['token' => $hash]);
+
                     } 
                     else 
                     {
@@ -55,6 +64,23 @@ class AuthController extends Controller {
             return Controller::errorMessage("Ooop's, something went wrong! Please try again later.");
         }
     }
+
+
+    /* Проверяем токен на валидность, если удалось попасть в этот метод, то возвращаем true */
+    public function getAuthorizedUser() {
+
+        $DB = new DB();
+
+        $currentUserID = $DB->select('tokens', ['user_id'])->where([['token', '=', $_COOKIE['token']]])->get()[0]['user_id'];
+
+        if ($currentUserInfo = $DB->select('users')->where([['id', '=', $currentUserID]])->get()) {
+            return $this->json($currentUserInfo);
+        }
+
+        return Controller::errorMessage('non authorized!');
+    }
+
+    
 
 
     /* Метод создания нового пользователя */
@@ -92,7 +118,7 @@ class AuthController extends Controller {
 
                         /* Время жизни куки ставим в 24 часа */
                         setcookie('token', $userToken, time() + 60*60*24);
-                        return true;
+                        return $this->json(['ID' => $userID]);
 
                     } 
                     else 

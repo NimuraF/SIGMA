@@ -4,7 +4,7 @@
 abstract class Controller {
     
     /* Метод преобразования и отправки информации в json-формате */
-    public function json(array $toJson) {
+    public function json(array $toJson = []) {
         /* Так же добавляем параметр о том, что доступ получен */
         $json = json_encode(['access' => true, 'data' => $toJson]);
         return $json;
