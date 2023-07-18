@@ -20,8 +20,22 @@ try {
     Router::Start();
 } 
 catch (Exception $e) {
-    $e->getMessage();
-}
-catch (PDOException $e) {
-    $e->getMessage();
+    switch (get_class($e)) {
+
+        /* 
+            Если встречаем PDO ошибку, то возвращаем
+            информацию о том, что невозможно установить
+            соединение с базой данных
+        */
+        case "PDOException": {
+            Router::errorDB();
+            break;
+        }
+
+
+        default: {
+            Router::error404();
+        }
+
+    };
 }

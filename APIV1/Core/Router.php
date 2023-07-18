@@ -30,6 +30,8 @@ final class Router {
             }
         }   
 
+
+
         /* Инициализируем объект реквеста */
         $request = new Request;
 
@@ -85,7 +87,8 @@ final class Router {
             }
         }
 
-        self::handle(self::error404());
+        /* Если не удалось найти совпадения, то бросаем 404 ошибку */
+        Router::error404();
 
         return 1;
     }
@@ -191,7 +194,7 @@ final class Router {
     }
 
     /* Метод, отвечающий за прикрепление middlewar-ов к маршрутам */
-    static function middleware(string $middleware) {
+    static function middleware(string $middleware) : void {
 
         /* Разбиваем переданные middleware */
         $arrMiddlewares = explode('|', $middleware);
@@ -227,8 +230,8 @@ final class Router {
         return new Response;
     }
 
-    /* Метод, отвечающий за добавление локальных маршрутов */
-    static function addLocalMiddlewares(string $route, string $method) {
+    /* Метод, отвечающий за добавление локальных middleware'ов к маршрутам */
+    static function addLocalMiddlewares(string $route, string $method) : void {
 
         /* ПРикрепляем все middleware's, которые привязаны к этому маршруту */
         foreach(self::$lmiddlewares as $middleware) {
@@ -239,9 +242,15 @@ final class Router {
 
     }
 
-    /* Метод, отвечающий за отправку Response */
-    static function handle(Response $response) {
+    /* 
+        Метод, отвечающий за отправку Response и
+        установку точки завершения программмы, т.е.
+        данный метод всегда является финальным при
+        отправке ответа
+    */
+    static function handle(Response $response) : void {
         echo $response->data;
+        exit();
     }
 
     /* Метод редиректа */
@@ -254,12 +263,20 @@ final class Router {
 
 
     /* Метод для отправки 404 ответа */
-    static function error404 () : Response {
-        return new Response(new class {
-            public string $access = "denied";
+    static function error404 () : void {
+        self::handle(new Response(new class {
+            public bool $access = false;
             public string $errorm = "Invalid route!";
-        });
+        }));
     } 
+
+    /* Метод для отправки ответа при невозможности соединиться с БД */
+    static function errorDB() : void {
+        self::handle(new Response(new class {
+            public bool $access = false;
+            public string $errorm = "Failed to connect to DB!";
+        }));
+    }
     
 
 }

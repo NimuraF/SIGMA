@@ -15,4 +15,5 @@ abstract class Controller {
         $error = json_encode(['access' => false, 'errorm' => $errorMessage]);
         return $error;
     }
+    
 }

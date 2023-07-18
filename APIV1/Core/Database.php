@@ -47,7 +47,6 @@ class DB {
 
 
 
-
     /*
         Реализует запрос без параметризации и
         возвращает только true или false в зависимости
@@ -68,7 +67,7 @@ class DB {
     /* 
         Метод для исполнения SELECT запроса
     */
-    public function select(string $from, array $columns = []) {
+    public function select(string $from, array $columns = []) : DB {
 
         $addColumns = "";
 
@@ -91,7 +90,7 @@ class DB {
 
 
 
-    public function update(string $table, array $values) {
+    public function update(string $table, array $values) : DB {
         $setValues = "UPDATE $table SET";
 
         foreach ($values as $key=>$value) {
@@ -156,7 +155,7 @@ class DB {
 
     
     /* Метод параметризации основных команд SQL */
-    public function where (?array $conditions) {
+    public function where (?array $conditions) : DB {
 
         /* 
             Проверяем, что поступивший список словий не пустой,
@@ -197,7 +196,7 @@ class DB {
         возвращает массив данных при успехе, при
         неудаче - false
     */
-    public function get() {
+    public function get() : array|bool {
 
         /* Проверяем, удалось ли подготовить запрос */
         if($get = $this->pdo->prepare($this->query)) {
@@ -232,7 +231,7 @@ class DB {
         Завершающий метод для параметров UPDATE и DELETE, 
         возвращает true при успехе, а при неудаче - false
     */
-    public function set() {
+    public function set() : bool {
 
         if($set = $this->pdo->prepare($this->query)) {
 
@@ -276,8 +275,10 @@ class DB {
 
 
     /* Функция очистки контейнеров для повторных запросов */
-    private function clearContainers() {
+    private function clearContainers() : void {
         $this->query = "";
         $this->paramsToPrepared = [];
     }
+
+
 }

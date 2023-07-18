@@ -5,7 +5,11 @@ final class Storage {
     static private string $path = "./Storage/";
 
 
-    /* Метод сохранения изображений */
+    /* 
+        Метод сохранения изображений, при успешном сохранении
+        возвращет строку, содержащую путь к файлу на сервере,
+        при неудаче вовзвращает пустую строку
+    */
     static function save(array $fileInfo, string $directory = "") : string {
 
         $path = self::$path.$directory."/";

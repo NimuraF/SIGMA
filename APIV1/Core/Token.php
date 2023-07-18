@@ -62,7 +62,7 @@ class Token {
         return $this->getToken();
     }
 
-    /* Метод, валидирующий токен и возвращающий true, если токен действительынй и false, если нет */
+    /* Метод, валидирующий токен и возвращающий true, если токен действительный, и false, если нет */
     public function validateToken(string $token) : bool {
 
         /* Открываем соединение с БД */

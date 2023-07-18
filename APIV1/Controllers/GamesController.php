@@ -25,6 +25,7 @@ class GamesController extends Controller {
             $page = (int) $request->params["page"];
         } 
 
+        
 
         return $this->json
         (
