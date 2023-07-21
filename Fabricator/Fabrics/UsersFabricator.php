@@ -1,5 +1,7 @@
 <?php
 
+/* ФАБРИКА ПОЛЬЩОВАТЕЛЕЙ*/
+
 class UsersFabricator extends BaseFabricator implements IFabricate {
 
     public function fabricate(callable $next)

@@ -1,5 +1,7 @@
 <?php
 
+/* ФАБРИКА ЖАРНРОВ */
+
 class GenresFabricator extends BaseFabricator implements IFabricate {
 
 

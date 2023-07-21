@@ -1,5 +1,7 @@
 <?php
 
+/* ФАБРИКА КАТЕГОРИЙ ДЛЯ КОММЕНТАРИЕВ */
+
 class CategoriesForCommentsFabricator extends BaseFabricator implements IFabricate {
 
     public function fabricate(callable $next) {
@@ -19,8 +21,6 @@ class CategoriesForCommentsFabricator extends BaseFabricator implements IFabrica
 
         $query = "INSERT INTO categories_for_comments (category_name) VALUES $sendRow";
 
-        print_r($query);
-
         $this->showResult($DB->queryTF($query));
 
         return $next();
@@ -29,7 +29,7 @@ class CategoriesForCommentsFabricator extends BaseFabricator implements IFabrica
 
     private array $categories = [
         'comments',
-        'games',
+        'news',
         'articles'
     ];
 

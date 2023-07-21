@@ -10,9 +10,11 @@ class BaseFabricator {
         'GenresFabricator' => './Fabricator/Fabrics/GenresFabricator.php',
         'GamesFabricator' => './Fabricator/Fabrics/GamesFabricator.php',
         'GamesGenresFabricator' => './Fabricator/Fabrics/GamesGenresFabricator.php',
+        'CategoriesForCommentsFabricator' => './Fabricator/Fabrics/CategoriesForCommentsFabricator.php',
         'UsersFabricator' => './Fabricator/Fabrics/UsersFabricator.php',
-        'RolesFabricator' => './Fabricator/Fabrics/RolesFabricator',
-        'CategoriesForCommentsFabricator' => './Fabricator/Fabrics/CategoriesForCommentsFabricator.php'
+        'RolesFabricator' => './Fabricator/Fabrics/RolesFabricator.php',
+        'UsersRolesFabricator' => './Fabricator/Fabrics/UsersRolesFabricator.php',
+        'ArticlesFabricator' => './Fabricator/Fabrics/ArticlesFabricator.php'
     ];
 
 

@@ -1,5 +1,7 @@
 <?php
 
+/* ФАБРИКА ЖАНРОВ ДЛЯ ИГР */
+
 class GamesGenresFabricator extends BaseFabricator implements IFabricate {
 
     protected array $games_genres = []; 
