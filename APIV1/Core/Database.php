@@ -65,7 +65,8 @@ class DB {
 
 
     /* 
-        Метод для исполнения SELECT запроса
+        Метод для исполнения SELECT запроса,
+        возвращает текущий контекст DB
     */
     public function select(string $from, array $columns = []) : DB {
 
@@ -74,11 +75,11 @@ class DB {
         /* Парсим требуемые колонки для select */
         if (sizeof($columns) > 0) {
             foreach ($columns as $column) {
-                $addColumns .= $column.", ";
+                $addColumns .= $from.".".$column.", ";
             }
             $addColumns = substr($addColumns, 0, -2);
         } else {
-            $addColumns = "*";
+            $addColumns = "$from.*";
         }
 
 
@@ -87,6 +88,23 @@ class DB {
         return $this;
     }
 
+
+    /* 
+        Метод для выполнения INNER JOIN операции,
+        возвращает текущий контекст DB
+    */
+    public function innerJoin(string $table, string $column = "", string $condition = "", string $equal = "") : DB {
+
+        /* Сразу определяем контекст, с какой таблицей будем соединять */
+        $this->query .= " INNER JOIN ".$table;
+
+        /* Если присутствует условие соединения, то заполняем и его */
+        if ($column !== "") {
+            $this->query .= " ON ".$column." ".$condition." ".$equal;
+        }
+
+        return $this;
+    }
 
 
 
@@ -99,6 +117,8 @@ class DB {
         }
 
         $this->query = $setValues;
+
+        print_r($this->query);
 
         return $this;
     }
@@ -153,8 +173,13 @@ class DB {
 
 
 
+
     
-    /* Метод параметризации основных команд SQL */
+    /* 
+        Метод параметризации основных команд SQL
+        возвращает контекст текущего DB, по умолчанию
+        конкатенирует параметры с условием AND
+    */
     public function where (?array $conditions) : DB {
 
         /* 
@@ -189,6 +214,82 @@ class DB {
 
 
 
+    
+    /* 
+        Метод параметризации основных команд SQL
+        возвращает контекст текущего DB, по умолчанию
+        конкатенирует параметры с условием OR
+    */
+    public function whereOr (?array $conditions) : DB {
+
+        if (!empty($conditions)) {
+
+            $whereConditions = [];
+
+            /* Перебирааем все вложенные массивы (условия) */
+            foreach ($conditions as $condition) {
+
+                array_push($whereConditions, $condition[0]." ".$condition[1]." ? ");
+
+                array_push($this->paramsToPrepared, $condition[2]);
+
+            }
+
+            /* Формируем итоговую строку */
+            $whereConditionsQuery = implode(" OR ", $whereConditions);
+
+
+            /* Проверяем, применялась ли уже до этого директива WHERE в строке запроса */
+            if(strpos($this->query, "WHERE") === false) {
+                $whereConditionsQuery = " WHERE ".$whereConditionsQuery;
+            } else {
+                $whereConditionsQuery = " AND (".$whereConditionsQuery.")";
+            }
+            
+
+            $this->query .= $whereConditionsQuery;
+        }
+
+        /* Возвращаем контекст текущего класса */
+        return $this;
+    }
+
+
+
+
+    /* 
+        Метод для группировки запроса,
+        возвращает контекст текущего DB
+    */
+    public function groupBy(array $columns = []) : DB {
+
+        $this->query .= " GROUP BY ";
+
+        foreach ($columns as $column) {
+            $this->query .= $column;
+        } 
+
+        return $this;
+    }
+
+
+
+
+    /*
+        Метод для указания особых параметров
+        группировки, указывается после метода
+        groupBy, возвращает контекс текущего DB
+    */
+    public function having(string $condition) : DB {
+
+        $this->query .= " HAVING ".$condition;
+
+        return $this;
+    }
+
+
+
+
 
 
     /* 
@@ -198,10 +299,12 @@ class DB {
     */
     public function get() : array|bool {
 
+
         /* Проверяем, удалось ли подготовить запрос */
         if($get = $this->pdo->prepare($this->query)) {
 
             $arrayReturn = [];
+
 
             /* Разбираем подготовленные параметры */
             $get->execute($this->paramsToPrepared);

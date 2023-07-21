@@ -16,7 +16,7 @@ class GamesFabricator extends BaseFabricator implements IFabricate {
         $faker = Faker\Factory::create('ru_RU');
 
         /* Генерируем определённое кол-во записей для последующей вставки в БД */
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < 100000; $i++) {
 
             $name = $faker->name();
             $publisher = $faker->text(15);

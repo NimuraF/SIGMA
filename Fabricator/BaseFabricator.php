@@ -9,23 +9,28 @@ class BaseFabricator {
     protected array $fabrics = [
         'GenresFabricator' => './Fabricator/Fabrics/GenresFabricator.php',
         'GamesFabricator' => './Fabricator/Fabrics/GamesFabricator.php',
-        'GamesGenresFabricator' => './Fabricator/Fabrics/GamesGenresFabricator.php'
+        'GamesGenresFabricator' => './Fabricator/Fabrics/GamesGenresFabricator.php',
+        'UsersFabricator' => './Fabricator/Fabrics/UsersFabricator.php',
+        'RolesFabricator' => './Fabricator/Fabrics/RolesFabricator',
+        'CategoriesForCommentsFabricator' => './Fabricator/Fabrics/CategoriesForCommentsFabricator.php'
     ];
 
 
     public function __construct()
     {
-        echo "\n".static::class." => ";
+        if (static::class !== "BaseFabricator") {
+            echo "\n\033[1;33m".static::class." \033[0m=> " ;
+        }
     }
 
 
     public function showResult(bool $result) {
         if ($result === true) {
-            echo "success";
+            echo "\033[3;32msuccess\033[0m";
         } 
         else 
         {
-            echo "error";
+            echo "\033[1;31merror\033[0m";
         }
     }
 

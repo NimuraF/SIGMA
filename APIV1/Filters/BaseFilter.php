@@ -4,6 +4,7 @@ abstract class BaseFilter {
 
     
     protected array $whereConditions = [];
+    protected array $whereOrConditions = [];
 
     public function __construct(array $filters)
     {
@@ -22,9 +23,14 @@ abstract class BaseFilter {
         }
     }
 
-    /* Возвращает условия фильтрации */
+    /* Возвращает условия фильтрации AND */
     public function filter() : array {
         return $this->whereConditions;
+    }
+
+    /* Возвращает условия фильтрации OR */
+    public function filterOr() : array {
+        return $this->whereOrConditions;
     }
 
 }

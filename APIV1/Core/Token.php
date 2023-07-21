@@ -69,7 +69,8 @@ class Token {
         $DB = new DB();
 
         /* Ищем в базе данных токен, переданный для валидирования */
-        $result = $DB->select('tokens', ['token_id'])->where([['token', '=', $token]])->get();
+        $result = $DB->select('tokens', ['token_id', 'user_id'])->where([['token', '=', $token]])->get();
+
 
         /* Если количество возвращённых (затронутых) записей не равно 1, то выбрасываем ошибку */
         if (count($result) != 1) {
@@ -77,6 +78,7 @@ class Token {
             return false;
         }
 
+        $this->currentUser = $result[0]['user_id'];
         $this->validated = true;
         return true;
     }

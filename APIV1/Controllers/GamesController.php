@@ -25,11 +25,28 @@ class GamesController extends Controller {
             $page = (int) $request->params["page"];
         } 
 
+        /* Если передан параметр, отвечающий за жанр, то строим выборку на join-ах*/
+
+        if (isset($request->params["genres"])) {
+            $genresCount = sizeof($request->params["genres"]);
+            return $this->json(
+                $DB->select("games")
+                    ->innerJoin("games_genres", 'games_genres.game_name', '=', 'games.name')
+                    ->where( $filters->filter() )
+                    ->whereOr( $filters->filterOr() )
+                    ->groupBy(['games.name'])
+                    ->having("COUNT(games.name) = $genresCount")
+                    ->get()
+            );
+        }
         
 
         return $this->json
         (
-            $DB->select("games")->where( $filters->filter() )->limit($page)->get()
+            $DB->select("games")
+                ->where( $filters->filter() )
+                ->limit($page, 50)
+                ->get()
         );
 
     }
@@ -151,5 +168,16 @@ class GamesController extends Controller {
         
     }
 
+
+    /* Возвращает словарь жанров */
+    public function loadAllGenres() {
+
+        $DB = new DB();
+        
+        $genres = $DB->select('genres', ['name'])->get();
+
+        return $this->json($genres);
+
+    }
     
 }

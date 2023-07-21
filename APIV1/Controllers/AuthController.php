@@ -40,7 +40,10 @@ class AuthController extends Controller {
                             'samesite' => 'Lax',
                         ]);
 
-                        return $this->json(['token' => $hash]);
+                        /* Удаляем пароль из возвращаемой информации */
+                        unset($user[0]['password']);
+
+                        return $this->json(['token' => $hash, 'user' => $user]);
 
                     } 
                     else 

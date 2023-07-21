@@ -27,5 +27,11 @@ class GameFilter extends BaseFilter {
 
     }
 
+    public function genres (array $genres) {
+        foreach($genres as $genre) {
+            array_push($this->whereOrConditions, ['games_genres.genre_name', '=', $genre]);
+        }
+    }
+
 
 }
