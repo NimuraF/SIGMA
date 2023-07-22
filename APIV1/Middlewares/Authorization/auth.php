@@ -27,7 +27,7 @@ class authMiddleware extends Middleware {
             /* Получаем текущего юзера после валидации токена */
             $currentUser = $token->getUser();
 
-            /* Устанавливаем последний ip=адрес данному пользователю */
+            /* Устанавливаем последний ip-адрес данному пользователю */
             $DB = new DB();
             $DB->query("UPDATE users SET last_ip = INET_ATON('$request->ipadr') WHERE id = $currentUser");
         }

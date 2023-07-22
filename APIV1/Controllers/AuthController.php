@@ -46,26 +46,13 @@ class AuthController extends Controller {
                         return $this->json(['token' => $hash, 'user' => $user]);
 
                     } 
-                    else 
-                    {
-                        return Controller::errorMessage("Ooop's, something went wrong! Please try again later.");
-                    }
-
+                    return Controller::errorMessage("Ooop's, something went wrong! Please try again later.");
                 } 
-                else 
-                {
-                    return Controller::errorMessage("Incorrect login or password.");
-                }
-            } 
-            else 
-            {
                 return Controller::errorMessage("Incorrect login or password.");
-            }
+            } 
+            return Controller::errorMessage("Incorrect login or password.");
         } 
-        else 
-        {
-            return Controller::errorMessage("Ooop's, something went wrong! Please try again later.");
-        }
+        return Controller::errorMessage("Ooop's, something went wrong! Please try again later.");
     }
 
 
@@ -87,7 +74,7 @@ class AuthController extends Controller {
 
 
     /* Метод создания нового пользователя */
-    public function createUser(Request $request) : bool {
+    public function createUser(Request $request) {
 
         /* Проверяем существование переданных почты, имени и пароля в реквесте */
         if (isset($request->params['email']) && isset($request->params['name']) && isset($request->params['password'])) {
@@ -114,37 +101,30 @@ class AuthController extends Controller {
 
 
                 /* Если удалось создать и записать токен пользователя, то устанавливаем его сразу же в куки */
-                if ($DB->insert('tokens', ['user_id' => $userID, 'token' => $userToken = $token->createToken([$email, $name])])) {
+                if ($DB->insert('tokens', ['user_id' => $userID, 'token' => $hash = $token->createToken([$email, $name])])) {
 
                     /* По умолчванию при регистрации ставим роль user */
                     if ($DB->insert('roles_users', ['user_id' => $userID, 'role_name' => 'User'])) {
 
                         /* Время жизни куки ставим в 24 часа */
-                        setcookie('token', $userToken, time() + 60*60*24);
-                        return $this->json(['ID' => $userID]);
+                        setcookie("token", $hash, [
+                            'expires' => time() + 60*60*24,
+                            'path' => '/',
+                            'domain' => 'gamedata.ru',
+                            'httponly' => true,
+                            'samesite' => 'Lax',
+                        ]);
+
+                        return $this->json(['token' => $hash, 'id' => 'ddd']);
 
                     } 
-                    else 
-                    {
-                        return Controller::errorMessage("Ooop's, something went wrong! Failed to add role.");
-                    }
-
+                    return Controller::errorMessage("Ooop's, something went wrong! Failed to add role.");
                 } 
-                else 
-                {
-                    return Controller::errorMessage("Failed to generete token");
-                }
-
+                return Controller::errorMessage("Failed to generete token");
             } 
-            else 
-            {
-                return Controller::errorMessage("Ooop's, something went wrong!");
-            }
+            return Controller::errorMessage("Ooop's, something went wrong!");
         } 
-        else 
-        {
-            return Controller::errorMessage("Incorrect params");
-        }
+        return Controller::errorMessage("Incorrect params");
     }
 
 }

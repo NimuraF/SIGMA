@@ -13,6 +13,11 @@ Router::get('/genres', GamesController::class, 'loadAllGenres'); // Метод, 
 Router::get('/news', NewsController::class, 'allNews'); //Метод, отвечающий за возврат всех новостей
 
 
+/* ARTICLES */
+Router::get('/articles', ArticlesController::class, 'allArticles'); //Метод, возвращающий список всех статей
+Router::post('/articles/create', ArticlesController::class, 'createArticle')::middleware('auth|permissioncheck'); //Метод, позволяющий создать новую новость
+
+
 /* USER */
 Router::get('/user/{id}', UserController::class, 'userInfo'); //Метод, возвращающий всю информацию о пользователе
 Router::post('/user/{id}/loadavatar', UserController::class, 'loadAvatar')::middleware('auth'); //Метод, отвечающий за загрузку аватара пользователя

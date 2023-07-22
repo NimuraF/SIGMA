@@ -14,7 +14,7 @@ class permissioncheckMiddleware extends Middleware {
                 [
                     [
                         /* Вызываем call_user_func, чтобы сразу получить результат, 
-                        потому что стрелочные функции в пыхе работают как параша
+                        потому что стрелочные функции в пыхе работают как помойка
                         */
 
                         'user_id', '=', call_user_func(function () use ($token) : string {
@@ -38,13 +38,13 @@ class permissioncheckMiddleware extends Middleware {
             $permissions = $DB->query("SELECT * FROM permissions WHERE role_name = '$roleName'");
 
             /* 
-            Перебираем роли и для каждой извлекаем список доступных маршрутов (хранится в виде руглярок в БД),
-            потому что было в падлу подключать Redis или заморачиваться, так как никто не оценит 
+                Перебираем роли и для каждой извлекаем список 
+                доступных маршрутов (хранится в виде наименований методов в БД)
             */
             foreach ($permissions as $permission) {
                 
-                /* Сравниваем с полученной из БД регуляркой */
-                if(preg_match("/".$permission['permission']."/", Router::$currentRoute) && $permission['method'] == Router::$currentMethod) {
+                /* Сравниваем с полученным из БД методом */
+                if(Router::$currentAction === $permission['permission']) {
                     $accesGranted = true;
                     break 2;
                 }

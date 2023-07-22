@@ -89,6 +89,9 @@ class DB {
     }
 
 
+
+
+
     /* 
         Метод для выполнения INNER JOIN операции,
         возвращает текущий контекст DB
@@ -105,6 +108,24 @@ class DB {
 
         return $this;
     }
+
+
+
+
+
+    /*
+        Метод для упорядочивания столбцов
+        в выборке по заданному параметру,
+        возвращает контекст текущего DB
+    */
+    public function orderBy(string $column, string $orientation = 'ASC') {
+        $this->query .= " ORDER BY $column $orientation";
+        return $this;
+    }
+
+
+
+
 
 
 
@@ -298,7 +319,6 @@ class DB {
         неудаче - false
     */
     public function get() : array|bool {
-
 
         /* Проверяем, удалось ли подготовить запрос */
         if($get = $this->pdo->prepare($this->query)) {

@@ -9,9 +9,20 @@ final class Router {
     static array $middlewares = []; //Таблица middleware'ов для текущего маршрута
     static array $lmiddlewares = []; //Таблица всех локальных middleware'ов
 
+
     static string $currentRoute = ""; //Во время заполнения выступает буфером, а при работе хранит текущий маршрут
     static string $currentMethod = ""; //Во время заполнения выступает буфером, а при работе хранит текущий маршрут
 
+
+    /* 
+        Определяем action контроллера, 
+        привязанный к текущему маршруту, 
+        нужен для корректной работы middleware permissioncheck 
+    */
+    static string $currentAction = "";
+
+    
+    
     /* Метод иницализации маршрутизатора */
     static function Start() {
 
@@ -28,8 +39,7 @@ final class Router {
             if ( getallheaders()['Content-Type'] == 'application/json') {
                 $_POST = json_decode(file_get_contents('php://input'), true);
             }
-        }   
-
+        }
 
 
         /* Инициализируем объект реквеста */
@@ -40,6 +50,9 @@ final class Router {
         {
             if ($route['method'] == self::$currentMethod && preg_match("/".$route['route']."/", self::$currentRoute)) 
             {
+
+                /* Устанавливаем текущий action */
+                self::$currentAction = $route['action'];
 
                 /* Добавляем локальные middlewares */
                 self::addLocalMiddlewares($route['route'], $route['method']);
@@ -52,12 +65,11 @@ final class Router {
                     $path = './APIV1/Controllers/'.$route['controller'].'.php';
 
                     /* Проверяем существование файла, отвечающего за данный контроллер */
-                    if(file_exists($path)) {
-                        require_once $path;
-                    } else {
-                        throw new Exception("Error 404");
+                    if(!file_exists($path)) {
+                        Router::error404();
                     }
 
+                    require_once $path;
 
                     /* Определяем параметры, полученные непосредственно из маршрута */
                     $params = self::parseParams($route['route'], self::$currentRoute);
@@ -67,12 +79,14 @@ final class Router {
 
 
                     /* Проверяем существование метода в контроллере */
-                    if (method_exists($controller, $action)) {
-                        if ($request->checkParams()) {
-                            $response->setData($controller->$action($request, ...$params));
-                        } else {
-                            $response->setData($controller->$action(...$params));
-                        }
+                    if (!method_exists($controller, $action)) {
+                        Router::error404();
+                    }
+
+                    if ($request->checkParams() || $route['method'] == "POST") {
+                        $response->setData($controller->$action($request, ...$params));
+                    } else {
+                        $response->setData($controller->$action(...$params));
                     }
                     
                     self::handle($response);

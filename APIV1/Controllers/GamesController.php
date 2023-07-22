@@ -11,7 +11,7 @@ class GamesController extends Controller {
         $DB = new DB;
 
         /* Номер страницы по умолчанию */
-        $page = 1;
+        $page = isset($request->params["page"]) ? (int) $request->params["page"] : 1;
         
 
         /* Определяем, что нам нужны фильтры */
@@ -19,14 +19,7 @@ class GamesController extends Controller {
         $filters = new GameFilter(isset($request->params) ? $request->params : []);
 
 
-        /* Проверяем наличие параметра page в url */
-        if (isset($request->params["page"])) 
-        {
-            $page = (int) $request->params["page"];
-        } 
-
-        /* Если передан параметр, отвечающий за жанр, то строим выборку на join-ах*/
-
+        /* Если передан параметр, отвечающий за жанр, то строим выборку на join-ах */
         if (isset($request->params["genres"])) {
             $genresCount = sizeof($request->params["genres"]);
             return $this->json(
