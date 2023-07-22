@@ -17,21 +17,35 @@ class ArticlesFabricator extends BaseFabricator implements IFabricate {
 
         for ($i = 0; $i < 1000; $i++) {
             $user = $users[array_rand($users)]['name'];
+
+            $article_head = $faker->text(100);
+
+            while(in_array($article_head, $this->heads) || str_contains($article_head, "'")) {
+                $article_head = $faker->text(100);
+            }
+
             $article_body = $faker->realText();
 
             while(str_contains($article_body, "'")) {
                 $article_body = $faker->realText();
             }
+            
 
-            $sendArticles[] = "('".$user."','".$article_body."')";
+            $sendArticles[] = "('".$user."','".$article_head."','".$article_body."')";
         }
 
         $sendRow = implode(",", $sendArticles);
 
-        $this->showResult($DB->queryTF("INSERT INTO articles (author_name, article_body) VALUES $sendRow"));
+        $file = fopen("fddd.txt", "wr");
+        fwrite($file, print_r($sendRow, true));
+
+        $this->showResult($DB->queryTF("INSERT INTO articles (author_name, article_head, article_body) VALUES $sendRow"));
 
         return $next();
 
     }
+
+    /* Массив заголовков */
+    private array $heads = [];
 
 }

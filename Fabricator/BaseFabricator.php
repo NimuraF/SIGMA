@@ -14,7 +14,8 @@ class BaseFabricator {
         'UsersFabricator' => './Fabricator/Fabrics/UsersFabricator.php',
         'RolesFabricator' => './Fabricator/Fabrics/RolesFabricator.php',
         'UsersRolesFabricator' => './Fabricator/Fabrics/UsersRolesFabricator.php',
-        'ArticlesFabricator' => './Fabricator/Fabrics/ArticlesFabricator.php'
+        'ArticlesFabricator' => './Fabricator/Fabrics/ArticlesFabricator.php',
+        'TagsFabricator' => './Fabricator/Fabrics/TagsFabricator.php'
     ];
 
 
