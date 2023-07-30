@@ -1,12 +1,22 @@
 <?php
 
 final class Request {
-    public array $params = [];
-    public string $ipadr = "";
-    public string|bool $auth = false;
+
+    public array $options = []; //Параметр для опций маршрута (Controller, Action, Method, Route)
+
+    public array $params = []; //Параметр для GET/POST/FILES параметров, передаваемых, вместе с маршрутом
+
+    public string $currentPath = ""; //Параметр, отвечающий за полный путь текущего маршрута (без GET-парамтеров)
+
+    public string $currentMeth = ""; //Параметр, отвечающий за метод текущего маршрута (дублирует информацию из options, но доступен раньше)
+
+    public string $ipadr = ""; // IP-адрес текущего клиента
+
+    public string|bool $auth = false; // Наличие авторизации у запроса, пришедшего с клиента
+
+
 
     public function __construct() {
-        
 
         /* Проверяем Get параметры */
         if (!empty($_GET)) {
@@ -25,6 +35,8 @@ final class Request {
 
     }
 
+
+
     /* Функция, возвращающая true, если параметры присутствуют и false, если массив пуст */
     public function checkParams() : bool {
         if (!empty($this->params)) {
@@ -33,4 +45,22 @@ final class Request {
         return false;
     }
 
+
+
+    /* Установка параметров маршрута */
+    public function setRouteOptions(array $options) : void {
+        $this->options = $options;
+    }
+
+    /* Установка текущего пути маршрута */
+    public function setCurrentPath(string $path) : void {
+        $this->currentPath = $path;
+    }
+
+    /* Установка текущего метода маршрута */
+    public function setCurrentMethod(string $method) : void {
+        $this->currentMeth = $method;
+    }
+
+    
 }

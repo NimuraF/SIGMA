@@ -36,9 +36,6 @@ class ArticlesFabricator extends BaseFabricator implements IFabricate {
 
         $sendRow = implode(",", $sendArticles);
 
-        $file = fopen("fddd.txt", "wr");
-        fwrite($file, print_r($sendRow, true));
-
         $this->showResult($DB->queryTF("INSERT INTO articles (author_name, article_head, article_body) VALUES $sendRow"));
 
         return $next();

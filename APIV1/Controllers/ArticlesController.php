@@ -2,7 +2,7 @@
 
 class ArticlesController extends Controller {
 
-    /* Метод, возвращающий все новости */
+    /* Метод, возвращающий все статьи */
     public function allArticles($request = new Request) {
 
         $DB = new DB();

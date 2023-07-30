@@ -10,6 +10,7 @@ require_once "Core/Request.php";
 require_once "Core/Token.php";
 require_once "Core/Response.php";
 require_once "Core/Storage.php";
+require_once "Core/App.php";
 
 
 require_once "Filters/BaseFilter.php"; //Подключаем базовый фильтр

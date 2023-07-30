@@ -44,7 +44,7 @@ class permissioncheckMiddleware extends Middleware {
             foreach ($permissions as $permission) {
                 
                 /* Сравниваем с полученным из БД методом */
-                if(Router::$currentAction === $permission['permission']) {
+                if($request->options['action'] === $permission['permission']) {
                     $accesGranted = true;
                     break 2;
                 }

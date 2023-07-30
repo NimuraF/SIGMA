@@ -10,21 +10,12 @@ final class Router {
     static array $lmiddlewares = []; //Таблица всех локальных middleware'ов
 
 
-    static string $currentRoute = ""; //Во время заполнения выступает буфером, а при работе хранит текущий маршрут
+    static string $currentRoute = ""; //Во время заполнения выступает буфером
     static string $currentMethod = ""; //Во время заполнения выступает буфером, а при работе хранит текущий маршрут
 
-
-    /* 
-        Определяем action контроллера, 
-        привязанный к текущему маршруту, 
-        нужен для корректной работы middleware permissioncheck 
-    */
-    static string $currentAction = "";
-
-    
     
     /* Метод иницализации маршрутизатора */
-    static function Start() {
+    static function Start() : int {
 
         self::$middlewares = Configuration::$globalMiddlewares; //Загружаем таблицу глобальных middleware'ов
 
@@ -45,66 +36,38 @@ final class Router {
         /* Инициализируем объект реквеста */
         $request = new Request;
 
+
+        /* Устанавливаем полный путь текущего запроса в объект Request */
+        $request->setCurrentPath(self::$currentRoute);
+
+        /* Устанавливаем метод текущего запроса в объект Request */
+        $request->setCurrentMethod(self::$currentMethod);
+
+
         /* Перебираем таблицу маршрутов и ищем совпадения */
         foreach (self::$routes as $route) 
         {
-            if ($route['method'] == self::$currentMethod && preg_match("/".$route['route']."/", self::$currentRoute)) 
+            if ($route['method'] == $request->currentMeth && preg_match("/".$route['route']."/", $request->currentPath)) 
             {
 
-                /* Устанавливаем текущий action */
-                self::$currentAction = $route['action'];
+                /* Устнаавливаем параметры маршруты в реквест */
+                $request->setRouteOptions($route);
 
                 /* Добавляем локальные middlewares */
                 self::addLocalMiddlewares($route['route'], $route['method']);
-                
-                /* Определяем reponse после вызова всех middleware */
-                if (($response = self::parseMiddlewares($request))->data === "") {
 
+                /* Вызываем обработчик приложения */
+                $response = self::app($request);
+                self::handle($response);
+                return 1;
 
-                    /* Подключаем контроллер, отвечающий за обработку этого маршрута */
-                    $path = './APIV1/Controllers/'.$route['controller'].'.php';
-
-                    /* Проверяем существование файла, отвечающего за данный контроллер */
-                    if(!file_exists($path)) {
-                        Router::error404();
-                    }
-
-                    require_once $path;
-
-                    /* Определяем параметры, полученные непосредственно из маршрута */
-                    $params = self::parseParams($route['route'], self::$currentRoute);
-
-                    $controller = new $route['controller'];
-                    $action = $route['action'];
-
-
-                    /* Проверяем существование метода в контроллере */
-                    if (!method_exists($controller, $action)) {
-                        Router::error404();
-                    }
-
-                    if ($request->checkParams() || $route['method'] == "POST") {
-                        $response->setData($controller->$action($request, ...$params));
-                    } else {
-                        $response->setData($controller->$action(...$params));
-                    }
-                    
-                    self::handle($response);
-
-                    return 1;
-                } 
-                else 
-                {
-                    self::handle($response);
-                    return 0;
-                }
             }
         }
 
         /* Если не удалось найти совпадения, то бросаем 404 ошибку */
         Router::error404();
-
-        return 1;
+        return 0;
+        
     }
 
 
@@ -222,8 +185,14 @@ final class Router {
     }
 
 
-    /* Метод, отвечающий за применение глобальных маршрутов */
-    static function parseMiddlewares(Request $request) : Response {
+
+
+    /* 
+        Метод, отвечающий за исполнение middleware и
+        передачу управления (если в цепи не возникло
+        ошибок) в обработчик самого приложения
+    */
+    static function app(Request $request) : Response {
 
         /* Достаём первый middleware из маршрута */
         $currentMiddlewareName = key(self::$middlewares)."Middleware";
@@ -238,16 +207,20 @@ final class Router {
             $middleware = new $currentMiddlewareName;
 
             /* Рекурсивно вызываем middleware по очереди */
-            return $middleware->handle($request, [self::class, 'parseMiddlewares']);
+            return $middleware->handle($request, [self::class, 'app']);
         }
 
-        return new Response;
+        /* Передаём управлением в обработчик приложения */
+        $app = new App;
+        return $app->handle($request);
     }
+
+
 
     /* Метод, отвечающий за добавление локальных middleware'ов к маршрутам */
     static function addLocalMiddlewares(string $route, string $method) : void {
 
-        /* ПРикрепляем все middleware's, которые привязаны к этому маршруту */
+        /* Прикрепляем все middleware's, которые привязаны к этому маршруту */
         foreach(self::$lmiddlewares as $middleware) {
             if ($middleware['method'] == $method && $middleware['route'] == $route) {
                 self::$middlewares[$middleware['middlewareName']] = Configuration::$routeMiddlewares[$middleware['middlewareName']];
@@ -267,13 +240,7 @@ final class Router {
         exit();
     }
 
-    /* Метод редиректа */
-    static function redirect() {
-
-    }
-
-
-
+   
 
 
     /* Метод для отправки 404 ответа */

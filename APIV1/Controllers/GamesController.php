@@ -3,8 +3,6 @@
 class GamesController extends Controller {
 
 
-
-
     /* Возвращает список всех игр */
     public function allGames ($request = new Request) {
 
@@ -29,6 +27,7 @@ class GamesController extends Controller {
                     ->whereOr( $filters->filterOr() )
                     ->groupBy(['games.name'])
                     ->having("COUNT(games.name) = $genresCount")
+                    ->limit($page, 50)
                     ->get()
             );
         }
@@ -71,13 +70,11 @@ class GamesController extends Controller {
     
     /* Метод для загрузки новой игры в БД */
     public function loadGame(Request $request) {
-
         /*
             Проверяем на наличие в реквеста полей, обязательных
             для текущего контекста таблицы БД, в случае с играми
             речь идёт о name, publisher и platform
         */
-
         if (isset($request->params['name']) && isset($request->params['publisher']) && isset($request->params['platform'])) 
         {
 
@@ -172,5 +169,7 @@ class GamesController extends Controller {
         return $this->json($genres);
 
     }
+
+
     
 }
