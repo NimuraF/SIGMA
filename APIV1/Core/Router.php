@@ -143,6 +143,10 @@ final class Router {
         self::$currentRoute = $route;
         self::$currentMethod = "POST";
 
+        /* По умолчанию ко всем post-параметрам применяется middleware - CSRF */
+
+        self::middleware("csrf");
+
         array_push(self::$routes, ['method' => 'POST', 'route' => $route, 'controller' => $controller, 'action' => $action]);
         return self::class;
     }

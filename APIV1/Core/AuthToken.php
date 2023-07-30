@@ -12,7 +12,7 @@ class Token {
     public function __construct() {
         if (isset($_COOKIE['token'])) {
 
-            /* Извлекаем токе из кук, если он есть*/
+            /* Извлекаем токен из кук, если он есть*/
             $this->token = $_COOKIE['token'];
 
             /* Сразу валидириуем токен */
@@ -69,11 +69,14 @@ class Token {
         $DB = new DB();
 
         /* Ищем в базе данных токен, переданный для валидирования */
-        $result = $DB->select('tokens', ['token_id', 'user_id'])->where([['token', '=', $token]])->get();
+        $result = $DB->select('tokens', ['token_id', 'user_id', 'created_at'])->where([['token', '=', $token]])->get();
 
-
-        /* Если количество возвращённых (затронутых) записей не равно 1, то выбрасываем ошибку */
-        if (count($result) != 1) {
+        /* 
+            Если количество возвращённых (затронутых) записей не равно 1, то выбрасываем ошибку,
+            то же самое касается и случая, когда полученная кука была создана больше, чем 24 часа
+            назад.
+        */
+        if (count($result) != 1 || (strtotime($result[0]['created_at']) - time()) > 0 ) {
             $this->validated = false;
             return false;
         }

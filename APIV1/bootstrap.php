@@ -7,7 +7,7 @@ require_once "Core/Router.php";
 require_once "Core/Controller.php";
 require_once "Core/Database.php";
 require_once "Core/Request.php";
-require_once "Core/Token.php";
+require_once "Core/AuthToken.php";
 require_once "Core/Response.php";
 require_once "Core/Storage.php";
 require_once "Core/App.php";

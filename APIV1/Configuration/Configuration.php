@@ -8,7 +8,8 @@ class Configuration {
     static array $routeMiddlewares = [
         'auth' => './APIV1/Middlewares/Authorization/auth.php',
         'notauth' => './APIV1/Middlewares/Authorization/notauth.php',
-        'permissioncheck' => './APIV1/Middlewares/Authorization/permissioncheck.php'
+        'permissioncheck' => './APIV1/Middlewares/Authorization/permissioncheck.php',
+        'csrf' => './APIV1/Middlewares/CSRF/csrf.php'
     ];
 
     static array $globalMiddlewares = [
