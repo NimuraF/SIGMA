@@ -5,67 +5,37 @@ class UserController extends Controller {
     /* Метод, отвечающий за загрузку аватара */
     public function loadAvatar(Request $request, string $id) {
 
-
         /* Проверяем на наличие самого свойства с картинкой в HTTP-запросе */
         if (isset($request->params['image'])) {
 
             $DB = new DB();
 
-
-            /* Проверяем на соответствие id, переданых в ссылке и из базы данных по токену */
-            if ($id == ($userID = $DB->select('tokens', ['user_id'])->where([['token', '=', $request->auth]])->get()[0]['user_id'])) 
+            /* Проверяем на соответствие id, переданых в ссылке и авторизованного по токену пользователя */
+            if ($id == $request->user_id) 
             {
+                if ( Storage::validationImage($request->params['image'], 300, 600) ) {
 
-                if ( Storage::validationImage($request->params['image']) ) {
-                
-                    $imageInfo = getimagesize($request->params['image']['tmp_name']);
+                    if( ($path = Storage::save($request->params['image'], 'avatars')) !== "") {
 
-                    if 
-                    (
-                        /* Ширина изображения */ $imageInfo[0] < 300 && 
-                        /* Высота изображения */ $imageInfo[1] < 600 &&
-                        /* Размер изображения (байт) */ $request->params['image']['size'] < 40000
-                    ) 
-                    {
-
-                        if( ($path = Storage::save($request->params['image'], 'avatars')) !== "") {
-
-                            $isLoaded = false;
-
-                            /* Если в базе данных уже хранится информация о картинке, то мы её удаляем */
-                            if ( ($oldAvatar = $DB->select('users', ['avatar'])->where([['id', '=', $userID]])->get()[0]['avatar']) !== NULL ) {
-                                Storage::delete($oldAvatar);
-                            }
-
-
-                            /* Если удалось сохранить запись в базу данных */
-                            if ($DB->update('users', ['avatar' => $path])->where([['id', '=', $userID]])->set()) {
-
-                                return $this->json();
-
-                            }
-
+                        /* Если в базе данных уже хранится информация о картинке, то мы её удаляем */
+                        if ( ($oldAvatar = $DB->select('users', ['avatar'])->where([['id', '=', $request->user_id]])->get()[0]['avatar']) !== NULL ) {
+                            Storage::delete($oldAvatar);
                         }
 
-                    } 
-                    else 
-                    {
-                        return Controller::errorMessage('Wrong parameters');
+
+                        /* Если удалось сохранить запись в базу данных */
+                        if ($DB->update('users', ['avatar' => $path])->where([['id', '=', $request->user_id]])->set()) {
+                            return $this->json();
+                        }
+
                     }
-                
+                    return Controller::errorMessage("Oops, something went wrong while uploading the image");
                 }
+                return Controller::errorMessage('Wrong file parameters');
             } 
-            else 
-            {
-                return Controller::errorMessage('Wrong parameters');
-            }
-
+            return Controller::errorMessage('Wrong user parameters');
         } 
-        else 
-        {
-            return Controller::errorMessage('Wrong parameters');
-        }
-
+        return Controller::errorMessage('Failed to add image to request');
     }
 
 
@@ -74,12 +44,7 @@ class UserController extends Controller {
 
         $DB = new DB();
 
-
-        if ($userInfo = $DB
-                ->select('users', ['id', 'name', 'avatar', 'banner'])
-                ->where([['id', '=', $id]])
-                ->get()
-            ) 
+        if ( $userInfo = $DB->select('users', ['id', 'name', 'avatar', 'banner'])->where([['id', '=', $id]])->get() ) 
         {
             return $this->json($userInfo);
         }
@@ -96,58 +61,38 @@ class UserController extends Controller {
 
             $DB = new DB();
 
-            if ($id == ($userID = $DB->select('tokens', ['user_id'])->where([['token', '=', $request->auth]])->get()[0]['user_id'])) 
+            if ($id == $request->user_id) 
             {
 
-                if ( Storage::validationImage($request->params['image']) ) {
-                
-                    $imageInfo = getimagesize($request->params['image']['tmp_name']);
+                if ( Storage::validationImage($request->params['image'], 1500, 300) ) {
 
-                    if 
-                    (
-                        /* Ширина изображения */ $imageInfo[0] < 4000 && 
-                        /* Высота изображения */ $imageInfo[1] < 4000 &&
-                        /* Размер изображения (байт) */ $request->params['image']['size'] < 10000000
-                    ) 
-                    {
-
-                        if( ($path = Storage::save($request->params['image'], 'banners')) !== "") {
-
-                            $isLoaded = false;
-
-                            /* Если в базе данных уже хранится информация о картинке, то мы её удаляем */
-                            if ( ($oldAvatar = $DB->select('users', ['banner'])->where([['id', '=', $userID]])->get()[0]['banner']) !== NULL ) {
-                                Storage::delete($oldAvatar);
-                            }
+                    if( ($path = Storage::save($request->params['image'], 'banners')) !== "") {
 
 
-                            /* Если удалось сохранить запись в базу данных */
-                            if ($DB->update('users', ['banner' => $path])->where([['id', '=', $userID]])->set()) {
-
-                                return $this->json();
-                            }
-
+                        /* Если в базе данных уже хранится информация о картинке, то мы её удаляем */
+                        if ( ($oldAvatar = $DB->select('users', ['banner'])->where([['id', '=', $request->user_id]])->get()[0]['banner']) !== NULL ) {
+                            Storage::delete($oldAvatar);
                         }
 
-                    } 
-                    else 
-                    {
-                        return Controller::errorMessage('Wrong parameters 1');
+
+                        /* Если удалось сохранить запись в базу данных */
+                        if ($DB->update('users', ['banner' => $path])->where([['id', '=', $request->user_id]])->set()) {
+                            return $this->json();
+                        }
+
                     }
-                
+                    return Controller::errorMessage("Oops, something went wrong while uploading the image");
                 }
+                return Controller::errorMessage('Wrong file parameters');
             } 
-            else 
-            {
-                return Controller::errorMessage('Wrong parameters 2');
-            }
-
+            return Controller::errorMessage('Wrong user parameters');
         } 
-        else 
-        {
-            Controller::errorMessage("Wrong parameters!");
-        }
-
+        return Controller::errorMessage('Failed to add image to request');
     }
+
+
+
+
+
 
 }

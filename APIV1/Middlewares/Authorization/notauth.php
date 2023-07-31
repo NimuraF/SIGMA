@@ -9,16 +9,13 @@ class notauthMiddleware extends Middleware {
 
     public function handle(Request $request, callable $next) : Response {
 
-        $token = new Token();
-
-        /* Проверяем токен */
-        if ($token->getValidated()) {
+        /* Проверяем токен доступа */
+        if ( $token = Token::validateToken(isset($request->cookies['token']) ? $request->cookies['token'] : NULL, "users_tokens") ) {
             return new Response(new class {
                 public bool $access = false;
                 public string $errorm = "already authorized";
             });
         }
-        
 
         return $next($request);
     }

@@ -1,5 +1,7 @@
 <?php
 
+use Configuration\Configuration;
+
 final class Storage {
 
     static private string $path = "./Storage/";
@@ -73,24 +75,36 @@ final class Storage {
 
     /*
         Метод, валидириющий файл, поступивший во временное
-        хранилище пыхи, на предмет того, что это картиночка (изображение) 
-        ((image))
+        хранилище пыхи, на предмет того, что это image, допускает
+        передачу доп. параметров, отвечающих за размер в пикселях/байтах
     */
-    static function validationImage(array $fileInfo) : bool {
+    static function validationImage
+    (
+        array $fileInfo, 
+        /* Ширина изображения */ int $maxWidth = Configuration::IMAGE_MAX_WIDTH_DEFAULT, 
+        /* Высота изображения */ int $maxHeight = Configuration::IMAGE_MAX_HEIGHT_DEFAULT, 
+        /* Размер изображения */ int $maxSize = Configuration::IMAGE_MAX_SIZE
+    ) : bool 
+    {
         
         /* Массив разрешённых форматов */
-        $allowFormats = ['jpeg', 'jpg', 'png'];
+        $allowFormats = ['jpeg', 'jpg', 'png', 'gif'];
         
         /* Перебираем все разрешённые форматы */
         foreach ($allowFormats as $format) { 
 
-            /* Если нашли соответствие по формату */
-            if ($fileInfo['type'] === "image/".$format) {
+            /* Если нашли соответствие по формату, переходим к анализу доп. параметров */
+            if ($fileInfo['type'] === "image/".$format) 
+            {
 
-                return true;
-
+                /* Получаем текущий параметры размера изображения из временной папки */
+                $imageInfo = getimagesize($fileInfo['tmp_name']);
+                
+                if($imageInfo[0] <= $maxWidth &&  $imageInfo[1] <= $maxHeight && $fileInfo['size'] <= $maxSize) 
+                {
+                    return true;
+                }
             }
-
         }
 
         return false;

@@ -9,6 +9,8 @@ final class Router {
     static array $middlewares = []; //Таблица middleware'ов для текущего маршрута
     static array $lmiddlewares = []; //Таблица всех локальных middleware'ов
 
+    static array $nonCSRF = []; //Таблиц POST-маршрутов, исключающих CSRF-защиту
+
 
     static string $currentRoute = ""; //Во время заполнения выступает буфером
     static string $currentMethod = ""; //Во время заполнения выступает буфером, а при работе хранит текущий маршрут
@@ -71,8 +73,11 @@ final class Router {
     }
 
 
+
+
+
     /* Метод для заполнения таблицы маршрутов (GET) */
-    static function get(string $route, string $controller, string $action) {
+    static function get(string $route, string $controller, string $action) : string {
 
         /* Добавляем новую запись в таблицу маршрутов */
 
@@ -109,9 +114,8 @@ final class Router {
         return self::class;
     }
 
-
     /* Метод для заполнения таблицы маршрутов (POST) */
-    static function post(string $route, string $controller, string $action) {
+    static function post(string $route, string $controller, string $action) : string {
 
         /* Добавляем новую запись в таблицу маршрутов */
 
@@ -143,16 +147,45 @@ final class Router {
         self::$currentRoute = $route;
         self::$currentMethod = "POST";
 
-        /* По умолчанию ко всем post-параметрам применяется middleware - CSRF */
-
-        self::middleware("csrf");
-
         array_push(self::$routes, ['method' => 'POST', 'route' => $route, 'controller' => $controller, 'action' => $action]);
         return self::class;
     }
 
+    /* Метод, отвечающий за прикрепление middlewar-ов к маршрутам */
+    static function middleware(string $middleware) : string {
 
-    /* Метод парсинга параметров из маршрута */
+        /* Разбиваем переданные middleware */
+        $arrMiddlewares = explode('|', $middleware);
+
+        /* Регистрируем middleware для конкретного маршрута в таблице middleware-ов */
+        foreach($arrMiddlewares as $currentLocalMiddleware) {
+            if (array_key_exists($currentLocalMiddleware, Configuration::$routeMiddlewares) && $currentLocalMiddleware !== "") {
+                array_push(self::$lmiddlewares, ['method' => self::$currentMethod, 'route' => self::$currentRoute, 'middlewareName' => $currentLocalMiddleware]);
+            }
+        }
+
+        return self::class;
+    }
+
+    /* Метод, отвечающий за исключение из текущего POST-маршрута csrf-защиты */
+    static function excludeCSRF() : string {
+
+        self::$nonCSRF[self::$currentRoute] = true;
+
+        return self::class;
+    }
+
+
+
+
+
+
+
+
+
+    /* 
+        Метод парсинга параметров из маршрута (HOST) 
+    */
     static function parseParams(string $defaultRoute, string $currentRoute) : array {
 
         /* Отсекаем последний слэш, если есть */
@@ -174,19 +207,7 @@ final class Router {
         return $params;
     }
 
-    /* Метод, отвечающий за прикрепление middlewar-ов к маршрутам */
-    static function middleware(string $middleware) : void {
 
-        /* Разбиваем переданные middleware */
-        $arrMiddlewares = explode('|', $middleware);
-
-        /* Регистрируем middleware для конкретного маршрута в таблице middleware-ов */
-        foreach($arrMiddlewares as $currentLocalMiddleware) {
-            if (array_key_exists($currentLocalMiddleware, Configuration::$routeMiddlewares) && $currentLocalMiddleware !== "") {
-                array_push(self::$lmiddlewares, ['method' => self::$currentMethod, 'route' => self::$currentRoute, 'middlewareName' => $currentLocalMiddleware]);
-            }
-        }
-    }
 
 
 
@@ -221,6 +242,11 @@ final class Router {
 
 
 
+
+
+
+
+
     /* Метод, отвечающий за добавление локальных middleware'ов к маршрутам */
     static function addLocalMiddlewares(string $route, string $method) : void {
 
@@ -231,7 +257,16 @@ final class Router {
             }
         }
 
+        /* Если метод POST, то добавляем CSRF-верификацию, за исключением форм авторизации и проверки пользователя */
+        if ( $method == "POST" && !isset(self::$nonCSRF[$route]) ) {
+            self::$middlewares["csrf"] = Configuration::$routeMiddlewares["csrf"];
+        }
+
     }
+
+
+
+
 
     /* 
         Метод, отвечающий за отправку Response и
@@ -243,6 +278,12 @@ final class Router {
         echo $response->data;
         exit();
     }
+
+
+
+
+
+
 
    
 

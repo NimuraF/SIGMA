@@ -6,13 +6,17 @@ final class Request {
 
     public array $params = []; //Параметр для GET/POST/FILES параметров, передаваемых, вместе с маршрутом
 
+    public array $cookies = []; //Параметр для кук, пришедших вместе с запросом
+
     public string $currentPath = ""; //Параметр, отвечающий за полный путь текущего маршрута (без GET-парамтеров)
 
     public string $currentMeth = ""; //Параметр, отвечающий за метод текущего маршрута (дублирует информацию из options, но доступен раньше)
 
     public string $ipadr = ""; // IP-адрес текущего клиента
 
-    public string|bool $auth = false; // Наличие авторизации у запроса, пришедшего с клиента
+    public string|bool $auth = false; // Наличие авторизации у запроса, пришедшего с клиента (токен/false)
+
+    public int $user_id = -1; //ID текущего пользователя при наличии авторизации
 
 
 
@@ -33,6 +37,10 @@ final class Request {
             $this->params = array_merge($this->params, $_FILES);
         }
 
+        /* Проверяем массив КУК */
+        if (!empty($_COOKIE)) {
+            $this->cookies = array_merge($this->cookies, $_COOKIE);
+        }
     }
 
 

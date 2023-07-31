@@ -4,7 +4,7 @@
 abstract class Controller {
     
     /* Метод преобразования и отправки информации в json-формате */
-    public function json(array|bool $toJson = []) {
+    public function json(array|bool $toJson = []) : string {
         
         /* 
             Если был передан параметр false,
@@ -21,7 +21,7 @@ abstract class Controller {
     }
 
     /* Метод отправки ошибки при каком-то условии */
-    static function errorMessage(string $errorMessage) {
+    static function errorMessage(string $errorMessage) : string {
         $error = json_encode(['access' => false, 'errorm' => $errorMessage]);
         return $error;
     }

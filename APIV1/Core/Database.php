@@ -13,11 +13,11 @@ class DB {
     private $pdo; //Объект для PDO
 
     public function __construct(
-        string $host = 'localhost', 
-        string $port = '3306', 
-        string $dbname = 'gamedata', 
-        string $user = 'root', 
-        string $password = '1111')
+        string $host = Configuration\Configuration::DB_HOST, 
+        string $port = Configuration\Configuration::DB_PORT, 
+        string $dbname = Configuration\Configuration::DB_NAME, 
+        string $user = Configuration\Configuration::DB_USER, 
+        string $password = Configuration\Configuration::DB_PASS)
     {
         $opt = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_SILENT, 
@@ -138,8 +138,6 @@ class DB {
         }
 
         $this->query = $setValues;
-
-        print_r($this->query);
 
         return $this;
     }

@@ -5,8 +5,6 @@ class permissioncheckMiddleware extends Middleware {
     public function handle(Request $request, callable $next) : Response 
     {
 
-        $token = new Token();
-
         $DB = new DB();
 
         /* Извлекаем весь список ролей у пользователя */
@@ -17,9 +15,9 @@ class permissioncheckMiddleware extends Middleware {
                         потому что стрелочные функции в пыхе работают как помойка
                         */
 
-                        'user_id', '=', call_user_func(function () use ($token) : string {
+                        'user_id', '=', call_user_func(function () use ($request) : string {
                             $result2 = new DB(); 
-                            $role = $result2->select('tokens', ['user_id'])->where([['token', '=', $token->getToken()]])->get()[0]['user_id'];
+                            $role = $result2->select('users_tokens', ['user_id'])->where([['token', '=', $request->auth]])->get()[0]['user_id'];
                             return $role;
                         })
                     ]
@@ -35,13 +33,14 @@ class permissioncheckMiddleware extends Middleware {
             $roleName = $role['role_name'];
 
             /* Получаем список всех разрешений для текущей роли */
-            $permissions = $DB->query("SELECT * FROM permissions WHERE role_name = '$roleName'");
+            $permissions = $DB->query("SELECT * FROM roles_permissions WHERE role_name = '$roleName'");
 
             /* 
                 Перебираем роли и для каждой извлекаем список 
                 доступных маршрутов (хранится в виде наименований методов в БД)
             */
             foreach ($permissions as $permission) {
+
                 
                 /* Сравниваем с полученным из БД методом */
                 if($request->options['action'] === $permission['permission']) {

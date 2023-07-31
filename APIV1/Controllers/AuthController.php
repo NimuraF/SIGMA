@@ -5,9 +5,6 @@ class AuthController extends Controller {
     /* Метод аутентификации пользователя */
     public function authentication (Request $request) {
 
-        /* Определяем класс токена */
-        $token = new Token();
-
         /* Проверяем, чтобы в реквесте находились параметры авторизации */
         if (isset($request->params['email']) && isset($request->params['password'])) {
 
@@ -26,18 +23,41 @@ class AuthController extends Controller {
                 /* Если пользователь был найден, то проверяем соответствие хэшей паролей */
                 if (password_verify($request->params['password'], $user[0]['password'])) {
 
-                    /* Генерируем хэш-ключ */
-                    $hash = hash('sha256', $request->params['email'].$request->params['email'].microtime());
+                    /* Генерируем и устанавливаем токен доступа */
+                    $hash = Token::setNewToken("users_tokens", $user[0]['id']);
 
-                    /* Если удалось добавить хэш в БД, то устанавливаем куку и её время жизни (24 часа) */
-                    if($DB->insert('tokens', ['user_id' => $user[0]['id'],'token' => $hash])) {
+                    /* Генерируем и устанавливаем рефреш-токен */
+                    $refreshToken = Token::setNewToken("users_refresh_tokens", $user[0]['id']);
 
+                    /* Генерируем csrf-токен для текущего пользователя */
+                    $csrf = Token::setNewToken("users_csrf_tokens", $user[0]['id']);
+
+                    /* Если удалось добавить все токены в БД, то устанавливаем куку и её время жизни (24 часа) */
+                    if($hash && $refreshToken && $csrf) 
+                    {
+
+                        /* Устанавливаем токен сессии */
                         setcookie("token", $hash, [
                             'expires' => time() + 60*60*24,
                             'path' => '/',
                             'domain' => 'gamedata.ru',
                             'httponly' => true,
                             'samesite' => 'Lax',
+                        ]);
+
+                        /* Устанавливаем рефреш токен */
+                        setcookie("refresh-token", $refreshToken, [
+                            'expires' => time() + 60*60*24*30,
+                            'path' => '/',
+                            'domain' => 'gamedata.ru',
+                            'httponly' => true,
+                        ]);
+
+                        /* Устанавливаем csrf-токен для текущей сессии */
+                        setcookie("csrf-token", $csrf, [
+                            'expires' => time() + 60*60*24,
+                            'path' => '/',
+                            'domain' => 'gamedata.ru'
                         ]);
 
                         /* Удаляем пароль из возвращаемой информации */
@@ -69,8 +89,6 @@ class AuthController extends Controller {
 
         return Controller::errorMessage('non authorized!');
     }
-
-    
 
 
     /* Метод создания нового пользователя */
@@ -127,4 +145,35 @@ class AuthController extends Controller {
         return Controller::errorMessage("Incorrect params");
     }
 
+
+    /* Метод для разлогинивая авторизованного пользователя */
+    public function logout() {
+
+        /* Убираем токен аутентификации */
+        setcookie("token", "", [
+            'expires' => -1,
+            'path' => '/',
+            'domain' => 'gamedata.ru',
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+
+        /* Убираем рефреш токен */
+        setcookie("refresh-token", "", [
+            'expires' => -1,
+            'path' => '/',
+            'domain' => 'gamedata.ru',
+            'httponly' => true,
+        ]);
+
+        /* Убираем csrf-токен */
+        setcookie("csrf-token", "", [
+            'expires' => -1,
+            'path' => '/',
+            'domain' => 'gamedata.ru'
+        ]);
+
+        return $this->json();
+        
+    }
 }

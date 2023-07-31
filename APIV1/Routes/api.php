@@ -20,11 +20,12 @@ Router::post('/articles/create', ArticlesController::class, 'createArticle')::mi
 
 /* USER */
 Router::get('/user/{id}', UserController::class, 'userInfo'); //Метод, возвращающий всю информацию о пользователе
-Router::post('/user/{id}/loadavatar', UserController::class, 'loadAvatar')::middleware('auth'); //Метод, отвечающий за загрузку аватара пользователя
-Router::post('/user/{id}/loadbanner', UserController::class, 'loadBanner')::middleware('auth'); //Метод, отвечающий за загрузку баннера пользователя     
+Router::post('/user/{id}/loadavatar', UserController::class, 'loadAvatar')::middleware('auth|permissioncheck'); //Метод, отвечающий за загрузку аватара пользователя
+Router::post('/user/{id}/loadbanner', UserController::class, 'loadBanner')::middleware('auth|permissioncheck'); //Метод, отвечающий за загрузку баннера пользователя     
 
 
 /* АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ */
-Router::post('/registration', AuthController::class, 'createUser')::middleware('notauth'); //Маршрут для регистрации пользователя
-Router::post('/authentication', AuthController::class, 'authentication')::middleware('notauth'); //Метод для аутентификации
-Router::post('/authorization', AuthController::class, 'getAuthorizedUser')::middleware('auth'); //Метод, возвращающий текущего авторизованного пользователя 
+Router::post('/registration', AuthController::class, 'createUser')::middleware('notauth')::excludeCSRF(); //Маршрут для регистрации пользователя
+Router::post('/authentication', AuthController::class, 'authentication')::middleware('notauth')::excludeCSRF(); //Метод для аутентификации
+Router::post('/authorization', AuthController::class, 'getAuthorizedUser')::middleware('auth')::excludeCSRF(); //Метод, возвращающий текущего авторизованного пользователя 
+Router::post('/logout', AuthController::class, 'logout')::middleware('auth')::excludeCSRF(); //Метод для разлогина
