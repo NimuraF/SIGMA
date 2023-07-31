@@ -183,33 +183,6 @@ final class Router {
 
 
 
-    /* 
-        Метод парсинга параметров из маршрута (HOST) 
-    */
-    static function parseParams(string $defaultRoute, string $currentRoute) : array {
-
-        /* Отсекаем последний слэш, если есть */
-        if (substr($currentRoute, -1) === "/") 
-        {
-            $currentRoute = rtrim($currentRoute, '/');
-        }
-
-        $params = [];
-
-        /* Парсим параметры из пути */ //str_replace('$', '', str_replace('^', '', $defaultRoute)))
-        $defaultRouteArray = explode('/', stripcslashes(preg_replace("/\w*(\^|\\$)\w*/", "", $defaultRoute)));
-        for ($i = 0; $i < sizeof($currentRouteArray = explode('/', $currentRoute)); $i++) {
-            if($defaultRouteArray[$i] !== $currentRouteArray[$i]) {
-                array_push($params, $currentRouteArray[$i]);
-            }
-        }
-
-        return $params;
-    }
-
-
-
-
 
 
     /* 
@@ -283,8 +256,6 @@ final class Router {
 
 
 
-
-
    
 
 
@@ -301,6 +272,14 @@ final class Router {
         self::handle(new Response(new class {
             public bool $access = false;
             public string $errorm = "Failed to connect to DB!";
+        }));
+    }
+
+    /* Метод для отправки ошибки при несоответствии параметров маршрута */
+    static function errorParseRouteParams() : void {
+        self::handle(new Response(new class {
+            public bool $access = false;
+            public string $errorm = "Error while parcing route params!";
         }));
     }
     

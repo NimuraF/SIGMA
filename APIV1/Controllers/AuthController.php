@@ -81,11 +81,11 @@ class AuthController extends Controller {
 
         $DB = new DB();
 
-        $currentUserID = $DB->select('tokens', ['user_id'])->where([['token', '=', $_COOKIE['token']]])->get()[0]['user_id'];
+        //$currentUserID = $DB->select('tokens', ['user_id'])->where([['token', '=', $_COOKIE['token']]])->get()[0]['user_id'];
 
-        if ($currentUserInfo = $DB->select('users')->where([['id', '=', $currentUserID]])->get()) {
-            return $this->json($currentUserInfo);
-        }
+        // if ($currentUserInfo = $DB->select('users')->where([['id', '=', $currentUserID]])->get()) {
+        //     return $this->json($currentUserInfo);
+        // }
 
         return Controller::errorMessage('non authorized!');
     }
@@ -119,9 +119,9 @@ class AuthController extends Controller {
 
 
                 /* Если удалось создать и записать токен пользователя, то устанавливаем его сразу же в куки */
-                if ($DB->insert('tokens', ['user_id' => $userID, 'token' => $hash = $token->createToken([$email, $name])])) {
+                if ($DB->insert('users_tokens', ['user_id' => $userID, 'token' => $hash = $token->createToken([$email, $name])])) {
 
-                    /* По умолчванию при регистрации ставим роль user */
+                    /* По умолчанию при регистрации ставим роль user */
                     if ($DB->insert('roles_users', ['user_id' => $userID, 'role_name' => 'User'])) {
 
                         /* Время жизни куки ставим в 24 часа */
@@ -138,7 +138,7 @@ class AuthController extends Controller {
                     } 
                     return Controller::errorMessage("Ooop's, something went wrong! Failed to add role.");
                 } 
-                return Controller::errorMessage("Failed to generete token");
+                return Controller::errorMessage("Failed to generate token");
             } 
             return Controller::errorMessage("Ooop's, something went wrong!");
         } 

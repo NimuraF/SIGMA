@@ -18,7 +18,11 @@ final class App {
 
     
         /* Определяем параметры, полученные непосредственно из маршрута */
-        $params = Router::parseParams($request->options['route'], $request->currentPath);
+        $params = self::parseParams($request->options['route'], $request->currentPath);
+
+        // print_r($request->options['route']);
+        // echo "\n";
+        // print_r($request->currentPath);
 
         $controller = new $request->options['controller'];
         $action = $request->options['action'];
@@ -31,13 +35,59 @@ final class App {
 
         $response = new Response();
 
-        if ($request->checkParams() || $request->options['method'] == "POST") {
-            $response->setData($controller->$action($request, ...$params));
+        /* Извлекаем аргументы функции, которые будут в неё передаваться и проверяем на соответствие */
+        $actionReflection = new ReflectionMethod($controller, $action);
+        $actionReflectionParameters = $actionReflection->getParameters();
+
+        /* 
+            Проверяем, требуется ли передавать в контроллер объект класса request,
+            по умолчанию требуется, чтобы при указании обязательной передачи реквеста
+            он шёл первым в порядке аргументов
+        */
+        if ($actionReflectionParameters[0]->getType()->getName() === "Request") {
+            array_shift($actionReflectionParameters);
+            if (count($actionReflectionParameters) === count($params)) {
+                $response->setData($controller->$action($request, ...$params));
+            } 
+            else {
+                Router::errorParseRouteParams();
+            }
         } else {
-            $response->setData($controller->$action(...$params));
+            if (count($actionReflectionParameters) === count($params)) {
+                $response->setData($controller->$action(...$params));
+            } 
+            else {
+                Router::errorParseRouteParams();
+            }
         }
 
         return $response;
     }
+
+
+    /* 
+        Метод парсинга параметров из маршрута (HOST) 
+    */
+    static function parseParams(string $defaultRoute, string $currentRoute) : array {
+
+        /* Отсекаем последний слэш, если есть */
+        if (substr($currentRoute, -1) === "/") 
+        {
+            $currentRoute = rtrim($currentRoute, '/');
+        }
+
+        $params = [];
+
+        /* Парсим параметры из пути */ //str_replace('$', '', str_replace('^', '', $defaultRoute)))
+        $defaultRouteArray = explode('/', stripcslashes(preg_replace("/(\^|\\$)/", "", $defaultRoute)));
+        for ($i = 0; $i < sizeof($currentRouteArray = explode('/', $currentRoute)); $i++) {
+            if($defaultRouteArray[$i] !== $currentRouteArray[$i]) {
+                array_push($params, $currentRouteArray[$i]);
+            }
+        }
+
+        return $params;
+    }
+
 
 }
