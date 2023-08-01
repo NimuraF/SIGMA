@@ -44,26 +44,32 @@ final class App {
             по умолчанию требуется, чтобы при указании обязательной передачи реквеста
             он шёл первым в порядке аргументов
         */
-        if ($actionReflectionParameters[0]->getType()->getName() === "Request") {
-            array_shift($actionReflectionParameters);
-            if (count($actionReflectionParameters) === count($params)) {
-                $response->setData($controller->$action($request, ...$params));
-            } 
-            else {
-                Router::errorParseRouteParams();
+
+        if (count($actionReflectionParameters) > 0) {
+            if ($actionReflectionParameters[0]->getType()->getName() === "Request") {
+                array_shift($actionReflectionParameters);
+                if (count($actionReflectionParameters) === count($params)) {
+                    $response->setData($controller->$action($request, ...$params));
+                } 
+                else {
+                    Router::errorParseRouteParams();
+                }
+            } else {
+                if (count($actionReflectionParameters) === count($params)) {
+                    $response->setData($controller->$action(...$params));
+                } 
+                else {
+                    Router::errorParseRouteParams();
+                }
             }
         } else {
-            if (count($actionReflectionParameters) === count($params)) {
-                $response->setData($controller->$action(...$params));
-            } 
-            else {
-                Router::errorParseRouteParams();
-            }
+            $response->setData($controller->$action());
         }
 
         return $response;
     }
 
+    
 
     /* 
         Метод парсинга параметров из маршрута (HOST) 

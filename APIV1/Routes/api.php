@@ -11,7 +11,6 @@ Router::get('/genres', GamesController::class, 'loadAllGenres'); // Метод, 
 
 /* NEWS */
 Router::get('/news', NewsController::class, 'allNews'); //Метод, отвечающий за возврат всех новостей
-Router::get('/news/{id}', NewsController::class, 'ggg');
 
 
 /* ARTICLES */
