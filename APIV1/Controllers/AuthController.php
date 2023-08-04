@@ -24,7 +24,7 @@ class AuthController extends Controller {
                 if (password_verify($request->params['password'], $user[0]['password'])) {
 
                     /* Генерируем и устанавливаем токен доступа */
-                    $hash = Token::setNewToken("users_tokens", $user[0]['id']);
+                    $token = Token::setNewToken("users_tokens", $user[0]['id']);
 
                     /* Генерируем и устанавливаем рефреш-токен */
                     $refreshToken = Token::setNewToken("users_refresh_tokens", $user[0]['id']);
@@ -33,11 +33,11 @@ class AuthController extends Controller {
                     $csrf = Token::setNewToken("users_csrf_tokens", $user[0]['id']);
 
                     /* Если удалось добавить все токены в БД, то устанавливаем куку и её время жизни (24 часа) */
-                    if($hash && $refreshToken && $csrf) 
+                    if($token && $refreshToken && $csrf) 
                     {
 
                         /* Устанавливаем токен сессии */
-                        setcookie("token", $hash, [
+                        setcookie("token", $token, [
                             'expires' => time() + 60*60*24,
                             'path' => '/',
                             'domain' => 'gamedata.ru',
@@ -63,7 +63,7 @@ class AuthController extends Controller {
                         /* Удаляем пароль из возвращаемой информации */
                         unset($user[0]['password']);
 
-                        return $this->json(['token' => $hash, 'user' => $user]);
+                        return $this->json(['token' => $token, 'user' => $user]);
 
                     } 
                     return Controller::errorMessage("Ooop's, something went wrong! Please try again later.");
@@ -77,15 +77,17 @@ class AuthController extends Controller {
 
 
     /* Проверяем токен на валидность, если удалось попасть в этот метод, то возвращаем true */
-    public function getAuthorizedUser() {
+    public function getAuthorizedUser(Request $request) {
 
-        $DB = new DB();
+        if ($request->auth) {
+            $DB = new DB();
 
-        //$currentUserID = $DB->select('tokens', ['user_id'])->where([['token', '=', $_COOKIE['token']]])->get()[0]['user_id'];
+            $currentUserID = $DB->select('users_tokens', ['user_id'])->where([['token', '=', $request->auth]])->get()[0]['user_id'];
 
-        // if ($currentUserInfo = $DB->select('users')->where([['id', '=', $currentUserID]])->get()) {
-        //     return $this->json($currentUserInfo);
-        // }
+            if ($currentUserInfo = $DB->select('users', ['id', 'name', 'avatar', 'banner'])->where([['id', '=', $currentUserID]])->get()) {
+                return $this->json($currentUserInfo);
+            }
+        }
 
         return Controller::errorMessage('non authorized!');
     }
@@ -108,24 +110,22 @@ class AuthController extends Controller {
             /* Если загрузка данных прошла успешно, то генерируем для пользователя стартовый токен */
             if($DB->insert('users', ['email' => $email, 'name' => $name, 'password' => password_hash($password, PASSWORD_DEFAULT)])) {
 
-                /* Инициализируем класс токена */
-                $token = new Token();
-
-                /* Получаем id созданного пользователя */
-                $userID = $DB->select('users', ['id'])->where([
+                /* Получаем данные созданного пользователя */
+                $user = $DB->select('users', ['id', 'name', 'avatar', 'banner', 'sex'])->where([
                     ['email', '=', $email],
                     ['name', '=', $name]
-                ])->get()[0]['id'];
+                ])->get();
 
+                if ($DB->insert("roles_users", ['user_id' => $user[0]['id'], 'role_name' => 'User'])) {
 
-                /* Если удалось создать и записать токен пользователя, то устанавливаем его сразу же в куки */
-                if ($DB->insert('users_tokens', ['user_id' => $userID, 'token' => $hash = $token->createToken([$email, $name])])) {
+                    $token = Token::setNewToken('users_tokens', $user[0]['id']);
+                    $refreshToken = Token::setNewToken('users_refresh_tokens', $user[0]['id']);
+                    $csrfToken = Token::setNewToken('users_csrf_tokens', $user[0]['id']);
 
-                    /* По умолчанию при регистрации ставим роль user */
-                    if ($DB->insert('roles_users', ['user_id' => $userID, 'role_name' => 'User'])) {
-
-                        /* Время жизни куки ставим в 24 часа */
-                        setcookie("token", $hash, [
+                    /* Если удалось создать и записать токен пользователя, а так же resfresh-токен, то устанавливаем его сразу же в куки */
+                    if ($token && $refreshToken && $csrfToken) {
+                        /* Устанавливаем токен сессии */
+                        setcookie("token", $token, [
                             'expires' => time() + 60*60*24,
                             'path' => '/',
                             'domain' => 'gamedata.ru',
@@ -133,12 +133,26 @@ class AuthController extends Controller {
                             'samesite' => 'Lax',
                         ]);
 
-                        return $this->json(['token' => $hash, 'id' => 'ddd']);
+                        /* Устанавливаем рефреш токен */
+                        setcookie("refresh-token", $refreshToken, [
+                            'expires' => time() + 60*60*24*30,
+                            'path' => '/',
+                            'domain' => 'gamedata.ru',
+                            'httponly' => true,
+                        ]);
 
-                    } 
-                    return Controller::errorMessage("Ooop's, something went wrong! Failed to add role.");
-                } 
-                return Controller::errorMessage("Failed to generate token");
+                        /* Устанавливаем csrf-токен для текущей сессии */
+                        setcookie("csrf-token", $csrfToken, [
+                            'expires' => time() + 60*60*24,
+                            'path' => '/',
+                            'domain' => 'gamedata.ru'
+                        ]);
+
+                        return $this->json(['token' => $token, 'user' => $user]);
+                    }
+                    return Controller::errorMessage("Something went worng while set tokens...");
+                }
+                return Controller::errorMessage("Something went wrong while set default role!");
             } 
             return Controller::errorMessage("Ooop's, something went wrong!");
         } 

@@ -62,7 +62,6 @@ final class App {
             $response->setData($controller->$action());
         }
 
-        //dsgdgsdg
 
         return $response;
     }

@@ -28,8 +28,11 @@ class authMiddleware extends Middleware {
 
             } 
 
+            $newToken = Token::setNewToken("users_tokens", $currentUser);
+            $newRefreshToken = Token::setNewToken("users_refresh_tokens", $currentUser);
+
             /* Устанавливаем токен в БД, если не получилось - бросаем ошибку */
-            if( !$newToken = Token::setNewToken("users_tokens", $currentUser) ) {
+            if( !$newToken || !$newRefreshToken ) {
                 return new Response(new class {
                     public bool $access = false;
                     public string $errorm = "Something went wrong during authorization!";
@@ -46,6 +49,14 @@ class authMiddleware extends Middleware {
                 'domain' => 'gamedata.ru',
                 'httponly' => true,
                 'samesite' => 'Lax',
+            ]);
+
+            /* Устанавливаем новый refrtesh-токен */
+            setcookie("refresh-token", $newRefreshToken, [
+                'expires' => time() + 60*60*24*30,
+                'path' => '/',
+                'domain' => 'gamedata.ru',
+                'httponly' => true,
             ]);
 
         }

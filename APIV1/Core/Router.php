@@ -52,7 +52,7 @@ final class Router {
             if ($route['method'] == $request->currentMeth && preg_match("/".$route['route']."/", $request->currentPath)) 
             {
 
-                /* Устнаавливаем параметры маршруты в реквест */
+                /* Устанавливаем параметры маршрута в реквест */
                 $request->setRouteOptions($route);
 
                 /* Добавляем локальные middlewares */

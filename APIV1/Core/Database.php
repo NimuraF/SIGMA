@@ -45,6 +45,12 @@ class DB {
     }
 
 
+    /*
+        Функция, возвращающая id последней записи 
+    */
+    public function lastInsertId() {
+        return $this->pdo->lastInsertId();
+    }
 
 
     /*
@@ -152,7 +158,7 @@ class DB {
     */
     public function insert(string $table, array $values = []) : bool {
 
-        /* Формируем основну для запросов по дабвлению в таблицу */
+        /* Формируем основу для запросов по дабвлению в таблицу */
         $insertQuery = "INSERT INTO $table (";
         $insertValues = "VALUES (";
 

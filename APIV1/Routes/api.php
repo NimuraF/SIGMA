@@ -27,5 +27,5 @@ Router::post('/user/{id}/loadbanner', UserController::class, 'loadBanner')::midd
 /* АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ */
 Router::post('/registration', AuthController::class, 'createUser')::middleware('notauth')::excludeCSRF(); //Маршрут для регистрации пользователя
 Router::post('/authentication', AuthController::class, 'authentication')::middleware('notauth')::excludeCSRF(); //Метод для аутентификации
-Router::post('/authorization', AuthController::class, 'getAuthorizedUser')::excludeCSRF(); //Метод, возвращающий текущего авторизованного пользователя 
+Router::post('/authorization', AuthController::class, 'getAuthorizedUser')::middleware('auth')::excludeCSRF(); //Метод, возвращающий текущего авторизованного пользователя 
 Router::post('/logout', AuthController::class, 'logout')::middleware('auth')::excludeCSRF(); //Метод для разлогина
