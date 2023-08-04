@@ -20,9 +20,6 @@ final class App {
         /* Определяем параметры, полученные непосредственно из маршрута */
         $params = self::parseParams($request->options['route'], $request->currentPath);
 
-        // print_r($request->options['route']);
-        // echo "\n";
-        // print_r($request->currentPath);
 
         $controller = new $request->options['controller'];
         $action = $request->options['action'];
@@ -44,7 +41,6 @@ final class App {
             по умолчанию требуется, чтобы при указании обязательной передачи реквеста
             он шёл первым в порядке аргументов
         */
-
         if (count($actionReflectionParameters) > 0) {
             if ($actionReflectionParameters[0]->getType()->getName() === "Request") {
                 array_shift($actionReflectionParameters);
@@ -65,6 +61,8 @@ final class App {
         } else {
             $response->setData($controller->$action());
         }
+
+        //dsgdgsdg
 
         return $response;
     }
