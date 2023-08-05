@@ -9,6 +9,10 @@ Router::post('/games/create', GamesController::class, 'loadGame')::middleware('a
 Router::get('/genres', GamesController::class, 'loadAllGenres'); // Метод, отвечающий за загрузку всех жанров
 
 
+/* LIBRARY */
+Router::post('/add-game/{id}', LibraryController::class, 'addGameToLibrary')::middleware('auth|permissioncheck'); // Метод, отвечающий за добавление игры в библиотеку
+
+
 /* NEWS */
 Router::get('/news', NewsController::class, 'allNews'); //Метод, отвечающий за возврат всех новостей
 

@@ -1,5 +1,7 @@
 <?php
 
+use function PHPSTORM_META\type;
+
 class UserController extends Controller {
 
     /* Метод, отвечающий за загрузку аватара */
@@ -11,7 +13,7 @@ class UserController extends Controller {
             $DB = new DB();
 
             /* Проверяем на соответствие id, переданых в ссылке и авторизованного по токену пользователя */
-            if ($id == $request->user_id) 
+            if ($id == $request->user_id && gettype($request->params['image']) === "array") 
             {
                 if ( Storage::validationImage($request->params['image'], 300, 600) ) {
 
@@ -33,7 +35,7 @@ class UserController extends Controller {
                 }
                 return Controller::errorMessage('Wrong file parameters');
             } 
-            return Controller::errorMessage('Wrong user parameters');
+            return Controller::errorMessage('Wrong user or file parameters');
         } 
         return Controller::errorMessage('Failed to add image to request');
     }
@@ -61,9 +63,8 @@ class UserController extends Controller {
 
             $DB = new DB();
 
-            if ($id == $request->user_id) 
+            if ($id == $request->user_id && gettype($request->params['image']) === "array") 
             {
-
                 if ( Storage::validationImage($request->params['image'], 1500, 300) ) {
 
                     if( ($path = Storage::save($request->params['image'], 'banners')) !== "") {
@@ -85,7 +86,7 @@ class UserController extends Controller {
                 }
                 return Controller::errorMessage('Wrong file parameters');
             } 
-            return Controller::errorMessage('Wrong user parameters');
+            return Controller::errorMessage('Wrong user or file parameters');
         } 
         return Controller::errorMessage('Failed to add image to request');
     }
