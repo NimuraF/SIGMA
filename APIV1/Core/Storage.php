@@ -4,7 +4,7 @@ use Configuration\Configuration;
 
 final class Storage {
 
-    static private string $path = "./Storage/";
+    static private string $path = Configuration::STORAGE_PATH;
 
 
     /* 

@@ -10,6 +10,7 @@ Router::get('/genres', GamesController::class, 'loadAllGenres'); // Метод, 
 
 
 /* LIBRARY */
+Router::get('/user/{id}/library', LibraryController::class, 'showLibrary'); //Метод, отвечающий за отображение библиотеки пользователя
 Router::post('/add-game/{id}', LibraryController::class, 'addGameToLibrary')::middleware('auth|permissioncheck'); // Метод, отвечающий за добавление игры в библиотеку
 
 
@@ -23,6 +24,7 @@ Router::post('/articles/create', ArticlesController::class, 'createArticle')::mi
 
 
 /* USER */
+Router::get('/user/top', UserController::class, 'topUsers'); //Метод, возвращающий топ пользователей (по уровню)
 Router::get('/user/{id}', UserController::class, 'userInfo'); //Метод, возвращающий всю информацию о пользователе
 Router::post('/user/{id}/loadavatar', UserController::class, 'loadAvatar')::middleware('auth|permissioncheck'); //Метод, отвечающий за загрузку аватара пользователя
 Router::post('/user/{id}/loadbanner', UserController::class, 'loadBanner')::middleware('auth|permissioncheck'); //Метод, отвечающий за загрузку баннера пользователя     

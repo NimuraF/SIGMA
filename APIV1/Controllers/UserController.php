@@ -1,7 +1,5 @@
 <?php
 
-use function PHPSTORM_META\type;
-
 class UserController extends Controller {
 
     /* Метод, отвечающий за загрузку аватара */
@@ -92,6 +90,20 @@ class UserController extends Controller {
     }
 
 
+    /* Метод, отвечающий за получение топа пользователей (по уровню опыта) */
+    public function topUsers(Request $request) {
+
+        $DB = new DB();
+
+        $page = isset($request->params["page"]) ? (int) $request->params["page"] : 1;
+
+        if ( $top = $DB->select('users', ['id', 'name', 'avatar', 'exp'])->orderBy('exp', 'DESC')->limit($page, 100)->get() !== false ) {
+            return $this->json($top);
+        }
+
+        return Controller::errorMessage("Ooops, something went wrong!");
+
+    }
 
 
 

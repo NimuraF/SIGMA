@@ -16,6 +16,9 @@ final class Configuration {
     const IMAGE_MAX_HEIGHT_DEFAULT = 2000;
     const IMAGE_MAX_SIZE = 10000000;
 
+    /* Базовый путь для хранилища */
+    const STORAGE_PATH = "./Storage/";
+
 
     /* Массив для регистрации middleware-ов для конкретных маршрутов */
     static array $routeMiddlewares = [
