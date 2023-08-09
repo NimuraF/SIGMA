@@ -45,4 +45,30 @@ class LibraryController extends Controller {
         return Controller::errorMessage("Failed to load library");
     }
 
+
+
+    public function removeGameFromLibrary(Request $request, string $game_id) {
+
+        $DB = new DB();
+
+        if 
+        ( 
+            $DB
+            ->delete('users_library')
+            ->where([
+                ['user_id', '=', $request->user_id],
+                ['game_id', '=', $game_id]
+            ])
+            ->set()
+        ) 
+        {
+            return $this->json(['game' => $game_id]);
+        }
+
+        return Controller::errorMessage('Failed to remove game from library');
+    }
+
+
+    
+
 }

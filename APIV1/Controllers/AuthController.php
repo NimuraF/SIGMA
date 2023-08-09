@@ -29,11 +29,9 @@ class AuthController extends Controller {
                     /* Генерируем и устанавливаем рефреш-токен */
                     $refreshToken = Token::setNewToken("users_refresh_tokens", $user[0]['id']);
 
-                    /* Генерируем csrf-токен для текущего пользователя */
-                    $csrf = Token::setNewToken("users_csrf_tokens", $user[0]['id']);
 
                     /* Если удалось добавить все токены в БД, то устанавливаем куку и её время жизни (24 часа) */
-                    if($token && $refreshToken && $csrf) 
+                    if($token && $refreshToken) 
                     {
 
                         /* Устанавливаем токен сессии */
@@ -51,13 +49,6 @@ class AuthController extends Controller {
                             'path' => '/',
                             'domain' => 'gamedata.ru',
                             'httponly' => true,
-                        ]);
-
-                        /* Устанавливаем csrf-токен для текущей сессии */
-                        setcookie("csrf-token", $csrf, [
-                            'expires' => time() + 60*60*24,
-                            'path' => '/',
-                            'domain' => 'gamedata.ru'
                         ]);
 
                         /* Удаляем пароль из возвращаемой информации */
@@ -120,10 +111,9 @@ class AuthController extends Controller {
 
                     $token = Token::setNewToken('users_tokens', $user[0]['id']);
                     $refreshToken = Token::setNewToken('users_refresh_tokens', $user[0]['id']);
-                    $csrfToken = Token::setNewToken('users_csrf_tokens', $user[0]['id']);
 
                     /* Если удалось создать и записать токен пользователя, а так же resfresh-токен, то устанавливаем его сразу же в куки */
-                    if ($token && $refreshToken && $csrfToken) {
+                    if ($token && $refreshToken) {
                         /* Устанавливаем токен сессии */
                         setcookie("token", $token, [
                             'expires' => time() + 60*60*24,
@@ -139,13 +129,6 @@ class AuthController extends Controller {
                             'path' => '/',
                             'domain' => 'gamedata.ru',
                             'httponly' => true,
-                        ]);
-
-                        /* Устанавливаем csrf-токен для текущей сессии */
-                        setcookie("csrf-token", $csrfToken, [
-                            'expires' => time() + 60*60*24,
-                            'path' => '/',
-                            'domain' => 'gamedata.ru'
                         ]);
 
                         return $this->json(['token' => $token, 'user' => $user]);
@@ -178,13 +161,6 @@ class AuthController extends Controller {
             'path' => '/',
             'domain' => 'gamedata.ru',
             'httponly' => true,
-        ]);
-
-        /* Убираем csrf-токен */
-        setcookie("csrf-token", "", [
-            'expires' => -1,
-            'path' => '/',
-            'domain' => 'gamedata.ru'
         ]);
 
         return $this->json();

@@ -4,7 +4,7 @@ class GamesController extends Controller {
 
 
     /* Возвращает список всех игр */
-    public function allGames (Request $request = new Request) {
+    public function allGames (Request $request) {
 
         $DB = new DB;
 

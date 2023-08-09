@@ -19,6 +19,10 @@ final class Configuration {
     /* Базовый путь для хранилища */
     const STORAGE_PATH = "./Storage/";
 
+    /* Параметры соединения с REDIS */
+    const REDIS_HOST = 'localhost';
+    const REDIS_PORT = '6379';
+
 
     /* Массив для регистрации middleware-ов для конкретных маршрутов */
     static array $routeMiddlewares = [
@@ -29,7 +33,8 @@ final class Configuration {
     ];
 
     static array $globalMiddlewares = [
-        'ipcheck' => './APIV1/Middlewares/ipcheck.php'
+        'ipcheck' => './APIV1/Middlewares/ipcheck.php',
+        'createcsrf' => './APIV1/Middlewares/CSRF/createcsrf.php'
     ];
 
 }

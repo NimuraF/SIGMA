@@ -12,6 +12,7 @@ Router::get('/genres', GamesController::class, 'loadAllGenres'); // Метод, 
 /* LIBRARY */
 Router::get('/user/{id}/library', LibraryController::class, 'showLibrary'); //Метод, отвечающий за отображение библиотеки пользователя
 Router::post('/add-game/{id}', LibraryController::class, 'addGameToLibrary')::middleware('auth|permissioncheck'); // Метод, отвечающий за добавление игры в библиотеку
+Router::post('/remove-game/{id}', LibraryController::class, 'removeGameFromLibrary')::middleware('auth|permissioncheck'); //Метод, отвечающий за удаление игры из библиотеки
 
 
 /* NEWS */
@@ -34,4 +35,4 @@ Router::post('/user/{id}/loadbanner', UserController::class, 'loadBanner')::midd
 Router::post('/registration', AuthController::class, 'createUser')::middleware('notauth')::excludeCSRF(); //Маршрут для регистрации пользователя
 Router::post('/authentication', AuthController::class, 'authentication')::middleware('notauth')::excludeCSRF(); //Метод для аутентификации
 Router::post('/authorization', AuthController::class, 'getAuthorizedUser')::middleware('auth')::excludeCSRF(); //Метод, возвращающий текущего авторизованного пользователя 
-Router::post('/logout', AuthController::class, 'logout')::middleware('auth')::excludeCSRF(); //Метод для разлогина
+Router::post('/logout', AuthController::class, 'logout')::middleware('auth'); //Метод для разлогина
