@@ -1,3 +1,6 @@
 .htaccess
 Storage
 /vendor/
+Fabricator
+default.conf
+docker-compose.yml

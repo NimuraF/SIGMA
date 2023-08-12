@@ -50,7 +50,7 @@ class GamesController extends Controller {
 
         $DB = new DB;
 
-        if($game = $DB->select("games", ['id', 'name', 'publisher', 'platform'])->where([
+        if($game = $DB->select("games", ['id', 'name', 'publisher', 'platform', 'image'])->where([
             ["id", "=", $id]
         ])->get()) 
         {

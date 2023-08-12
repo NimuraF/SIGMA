@@ -17,7 +17,7 @@ final class Configuration {
     const IMAGE_MAX_SIZE = 10000000;
 
     /* Базовый путь для хранилища */
-    const STORAGE_PATH = "./Storage/";
+    const STORAGE_PATH = "./storage/";
 
     /* Параметры соединения с REDIS */
     const REDIS_HOST = 'localhost';

@@ -11,6 +11,7 @@ Router::get('/genres', GamesController::class, 'loadAllGenres'); // Метод, 
 
 /* LIBRARY */
 Router::get('/user/{id}/library', LibraryController::class, 'showLibrary'); //Метод, отвечающий за отображение библиотеки пользователя
+Router::get('/user/{id}/library/{game_id}', LibraryController::class, 'checkGameInLibrary'); //Метод, проверяющий, находится ли игра в библиотеке пользователя
 Router::post('/add-game/{id}', LibraryController::class, 'addGameToLibrary')::middleware('auth|permissioncheck'); // Метод, отвечающий за добавление игры в библиотеку
 Router::post('/remove-game/{id}', LibraryController::class, 'removeGameFromLibrary')::middleware('auth|permissioncheck'); //Метод, отвечающий за удаление игры из библиотеки
 

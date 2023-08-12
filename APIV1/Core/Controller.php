@@ -25,5 +25,16 @@ abstract class Controller {
         $error = json_encode(['access' => false, 'errorm' => $errorMessage]);
         return $error;
     }
+
+    /* Метод для загрузки фильтров */
+    public function loadFilters(string $filterName, array $filterParams = []) : object|false {
+        $filterPath = "./APIV1/Filters/UsableFilters/".$filterName."Filter.php";
+        if (file_exists($filterPath)) {
+            include $filterPath;
+            $filterClassName = $filterName."Filter";
+            return new $filterClassName($filterParams);
+        }
+        return false;
+    }
     
 }
