@@ -71,12 +71,14 @@ class AuthController extends Controller {
     public function getAuthorizedUser(Request $request) {
 
         if ($request->auth) {
+
             $DB = new DB();
 
             $currentUserID = $DB->select('users_tokens', ['user_id'])->where([['token', '=', $request->auth]])->get()[0]['user_id'];
 
             if ($currentUserInfo = $DB->select('users', ['id', 'name', 'avatar', 'banner'])->where([['id', '=', $currentUserID]])->get()) {
-                return $this->json($currentUserInfo);
+                $roles = $DB->select('roles_users', ['role_name'])->where([['user_id', '=', $currentUserID]])->get();
+                return $this->json(['user' => $currentUserInfo, 'roles' => $roles]);
             }
         }
 

@@ -1,5 +1,5 @@
 .htaccess
-Storage
+storage
 /vendor/
 Fabricator
 default.conf

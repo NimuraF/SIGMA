@@ -13,8 +13,7 @@ class GamesController extends Controller {
         
 
         /* Определяем, что нам нужны фильтры */
-        include "./APIV1/Filters/UsableFilters/GameFilter.php";
-        $filters = new GameFilter(isset($request->params) ? $request->params : []);
+        $filters = $this->loadFilters('Game', $request->params);
 
 
         /* Если передан параметр, отвечающий за жанр, то строим выборку на join-ах */
@@ -23,8 +22,8 @@ class GamesController extends Controller {
             return $this->json(
                 $DB->select("games")
                     ->innerJoin("games_genres", 'games_genres.game_name', '=', 'games.name')
-                    ->where( $filters->filter() )
-                    ->whereOr( $filters->filterOr() )
+                    ->where( $filters !== false ? $filters->filter() : [] )
+                    ->whereOr( $filters !== false ? $filters->filterOr() : [])
                     ->groupBy(['games.name'])
                     ->having("COUNT(games.name) = $genresCount")
                     ->limit($page, 50)
@@ -50,7 +49,7 @@ class GamesController extends Controller {
 
         $DB = new DB;
 
-        if($game = $DB->select("games", ['id', 'name', 'publisher', 'platform', 'image'])->where([
+        if($game = $DB->select("games", ['id', 'name', 'publisher', 'platform', 'image', 'about'])->where([
             ["id", "=", $id]
         ])->get()) 
         {
@@ -88,77 +87,56 @@ class GamesController extends Controller {
                 'release_date' => isset($request->params['release_date']) ? $request->params['release_date'] : NULL
             ];
 
-
-
             /* Проверяем на успешность добавление записи в таблицу */
-            if( $DB->insert('games', $newGame) ) 
+            if( $DB->insertOrUpdate('games', $newGame) ) 
             {
 
-                $note = "";
+                $notes = [];
 
-                /* Проверяем на наличие изображения в request */
-                if (isset($request->params['image'])) 
+                /* Проверяем на наличие изображения в request и валидируем картинку, а так же извлекаем картинку из БД */
+                if 
+                (
+                    isset($request->params['image']) 
+                    && Storage::validationImage($request->params['image'], 400, 700)
+                    && ($pathToFile = Storage::save($request->params['image'], 'game_images')) !== ""
+                    && ( $currentImage = $DB->select('games', ['image'])->where([['name', '=', $request->params['name']]])->get() ) !== false
+                ) 
                 {
 
-                    /* Проверяем, чтобы загружаемый файл обязательно был картинкой */
-                    if (Storage::validationImage($request->params['image'])) {
-
-                        /* Если удалось сохранить в директорию на сервере */
-                        if( ($pathToFile = Storage::save($request->params['image'], 'game_images')) !== "" ) {
-                            
-                            /* Обновляем картинку у игры */
-                            if ($DB->update('games', ['image' => $pathToFile])->where([['name', '=', $request->params['name']]])->set()) {
-
-                                $note .= 'image succesfully updated';
-
-                            } 
-                            else 
-                            {
-                                $note .= "failed to load image";
-                            }
-
-                        } 
-                        else 
-                        {
-                            $note .= "failed to load image";
-                        }
-
-                    } 
-                    else 
-                    {
-                        $note .= "failed to load image";
+                    /* Если картинка уже была установлена, то удаляем её */
+                    if ($currentImage[0]['image'] !== NULL) {
+                        Storage::delete($currentImage[0]['image']);
                     }
 
+                    /* Обновляем картинку у игры */
+                    if (!$DB->update('games', ['image' => $pathToFile])->where([['name', '=', $request->params['name']]])->set()) {
+                        $notes[] = "Failed to load image to DB";
+                    }
+                } 
+                else 
+                {
+                    $notes[] = "Incorrect image file";
                 }
-
 
                 /* Проверяем на наличие жанров при добавлении игры */
                 if ( isset($request->params['genres']) ) {
-
                     /* Перебираем все жанры, пришедшие от пользователя */
                     foreach($request->params['genres'] as $genre) {
-
                         if (!$DB->insert('games_genres', ['game_name' => $request->params['name'], 'genre_name' => $genre])) {
-                            $note .= " | can't add genre ".$genre." to game ".$request->params['name'];
+                            $notes[] = "can't add genre ".$genre." to game ".$request->params['name'];
                         }
-
                     }
-
                 }
                 
-                return $this->json(['note' => $note]);
-
+                return $this->json($notes);
             }
-
             return Controller::errorMessage("Something went wrong");
-
         }
-
         return Controller::errorMessage("Not enough parameters");
-        
     }
 
 
+    
     /* Возвращает словарь жанров */
     public function loadAllGenres() {
 

@@ -20,6 +20,10 @@ Router::post('/remove-game/{id}', LibraryController::class, 'removeGameFromLibra
 Router::get('/news', NewsController::class, 'allNews'); //Метод, отвечающий за возврат всех новостей
 
 
+/* COMMENTS */
+Router::get('/comments/{category}/{id}', CommentsController::class, 'getCommentsForEntity'); //Метод, отвечающий за получение всех комментариев к сущности
+
+
 /* ARTICLES */
 Router::get('/articles', ArticlesController::class, 'allArticles'); //Метод, возвращающий список всех статей
 Router::post('/articles/create', ArticlesController::class, 'createArticle')::middleware('auth|permissioncheck'); //Метод, позволяющий создать новую новость

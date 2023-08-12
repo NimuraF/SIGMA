@@ -12,12 +12,14 @@ class DB {
 
     private $pdo; //Объект для PDO
 
-    public function __construct(
+    public function __construct
+    (
         string $host = Configuration\Configuration::DB_HOST, 
         string $port = Configuration\Configuration::DB_PORT, 
         string $dbname = Configuration\Configuration::DB_NAME, 
         string $user = Configuration\Configuration::DB_USER, 
-        string $password = Configuration\Configuration::DB_PASS)
+        string $password = Configuration\Configuration::DB_PASS
+    )
     {
         $opt = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_SILENT, 
@@ -134,7 +136,11 @@ class DB {
 
 
 
-
+    /* 
+        Метод для обновления даннных,
+        возвращается контекст текущего
+        запроса
+    */
     public function update(string $table, array $values) : DB {
         $setValues = "UPDATE $table SET";
 
@@ -147,6 +153,7 @@ class DB {
 
         return $this;
     }
+
 
 
 
@@ -173,6 +180,71 @@ class DB {
         $insertQuery = substr($insertQuery, 0, -1).") ".substr($insertValues, 0, -1).")";
 
         $this->query = $insertQuery;
+
+        /* Подготавливаем и выполянем запрос к базе данных*/
+        if ($update = $this->pdo->prepare($this->query)) {
+            if(!$update->execute($this->paramsToPrepared)) {
+
+                /* Чистим контейнеры (основную строку query и массив подготовленных параметров) */
+                $this->clearContainers();
+
+                return false;
+            }
+
+            /* Чистим контейнеры (основную строку query и массив подготовленных параметров) */
+            $this->clearContainers();
+            return true;
+        }
+
+        $this->clearContainers();
+        return false;
+    }
+
+
+
+
+
+    /* 
+        Метод вставки новых данных в таблицу, если
+        же данный ключ уже существует в базе данных,
+        то данные в записи будут обновлены. При
+        успехе возвращает true, в то время как при
+        неудаче возвращается false
+    */
+    public function insertOrUpdate(string $table, array $values = []) : bool {
+
+        /* Формируем основу для запросов по дабвлению в таблицу */
+        $insertQuery = "INSERT INTO $table (";
+        $insertValues = "VALUES (";
+
+        /* Разбираем параметры для последующей подготовки */
+        foreach($values as $key=>$value) { 
+            $insertQuery .= $key.",";
+            array_push($this->paramsToPrepared, $value);
+            $insertValues .= "?,";
+        }
+
+        /* Обрезаем последнюю запятую и закрываем определяемые параметры */
+        $insertQuery = substr($insertQuery, 0, -1).") ".substr($insertValues, 0, -1).")";
+
+        /* Добавляем условия ON DUPLICATE KEY */
+        $insertQuery .= " ON DUPLICATE KEY UPDATE ";
+
+        /* Массив параметров для дублирования */
+        $ONDParams = [];
+
+        /* Разбираем параметры для условия on duplicate key */
+        foreach($values as $key=>$value) { 
+            $ONDParams[] = $key." = ?";
+            array_push($this->paramsToPrepared, $value);
+        }
+
+        /* Добавляем параметры ON DUPLICATE KEY */
+        $insertQuery .= implode(",", $ONDParams);
+
+        $this->query = $insertQuery;
+
+
 
         /* Подготавливаем и выполянем запрос к базе данных*/
         if ($update = $this->pdo->prepare($this->query)) {
