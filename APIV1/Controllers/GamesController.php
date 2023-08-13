@@ -15,6 +15,8 @@ class GamesController extends Controller {
         /* Определяем, что нам нужны фильтры */
         $filters = $this->loadFilters('Game', $request->params);
 
+        /* Поддерживается только сортировка по имени и дате добавления игры в БД */
+        $order_by = isset($request->params['order']) && $request->params['order'] == 1 ? "created_at" : "name"; 
 
         /* Если передан параметр, отвечающий за жанр, то строим выборку на join-ах */
         if (isset($request->params["genres"])) {
@@ -26,16 +28,17 @@ class GamesController extends Controller {
                     ->whereOr( $filters !== false ? $filters->filterOr() : [])
                     ->groupBy(['games.name'])
                     ->having("COUNT(games.name) = $genresCount")
+                    ->orderBy($order_by)
                     ->limit($page, 50)
                     ->get()
             );
         }
-        
 
         return $this->json
         (
             $DB->select("games")
                 ->where( $filters->filter() )
+                ->orderBy($order_by, "DESC")
                 ->limit($page, 50)
                 ->get()
         );
@@ -84,7 +87,8 @@ class GamesController extends Controller {
                 'name' => $request->params['name'],
                 'publisher' => $request->params['publisher'],
                 'platform' => $request->params['platform'],
-                'release_date' => isset($request->params['release_date']) ? $request->params['release_date'] : NULL
+                'release_date' => isset($request->params['release_date']) ? $request->params['release_date'] : NULL,
+                'about' => isset($request->params['about']) ? $request->params['about'] : NULL
             ];
 
             /* Проверяем на успешность добавление записи в таблицу */
@@ -97,7 +101,7 @@ class GamesController extends Controller {
                 if 
                 (
                     isset($request->params['image']) 
-                    && Storage::validationImage($request->params['image'], 400, 700)
+                    && Storage::validationImage($request->params['image'], 1500, 2000)
                     && ($pathToFile = Storage::save($request->params['image'], 'game_images')) !== ""
                     && ( $currentImage = $DB->select('games', ['image'])->where([['name', '=', $request->params['name']]])->get() ) !== false
                 ) 
